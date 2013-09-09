@@ -1,0 +1,6 @@
+vendor
+tmp
+.buildpath
+.settings
+.project
+config.php

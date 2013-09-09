@@ -1,0 +1,5 @@
+<div class="post-box">
+{% if post.repost %}<div class="post-repost-header">reposted from <img src="{{post.user.avatar_image.url}}" /> {{post.user.name}} (@{{post.user.username}}):</div>{% endif %}
+<p class="post-text">{{post.html}}</p>
+<p class="post-footer">{{post.created_at|date('Y/m/d H:i')}} - {{post.num_stars}} stars - {{post.num_replies}} replies - {{post.num_reposts}} reposts - <a href="/post/{{post.id}}">Permalink</a>{% if post.has_thread %} - <a href="/thread/{{post.id}}">View Conversation Thread</a>{% endif %}</p>
+</div>

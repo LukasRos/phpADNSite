@@ -1,0 +1,16 @@
+<html>
+<head>
+	<title>{% block title %}{{title}}{% endblock %}</title>
+	<link rel="stylesheet" type="text/javascript" href="/default/css/style.css" />
+</head>
+<body>
+	<div class="header-box">
+		<h1>{{title}}</h1>
+		<img src="{{user.avatar_image.url}}" />
+		<p>{{user.description.text}}</p>
+	</div>
+	{% block content %}
+	{% endblock %}
+	<div class="footer">powered by <a href="http://app.net/">app.net</a> and <a href="https://github.com/LukasRos/phpADNSite">phpADNSite</a> - Username: <a href="https://alpha.app.net/{{username}}" rel="me">@{{username}}</a></div>
+</body>
+</html>

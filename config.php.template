@@ -1,0 +1,11 @@
+<?php
+
+return array(
+	'variables' => array(),
+	'username' => '',
+	'template' => 'default',
+	'db.host' => '',
+	'db.name' => '',
+	'db.user' => '',
+	'db.password' => ''
+);
