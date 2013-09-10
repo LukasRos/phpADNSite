@@ -17,26 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
+namespace PhpADNSite\Exceptions;
 
-require_once "../vendor/autoload.php";
-$config = require "../config.php";
-
-$site = new Silex\Application();
-PhpADNSite\ConfigLoader::configure($site, $config);
-
-$site['dataRetriever'] = new PhpADNSite\DataRetriever($site['orm.em'], $site['user']);
-$site['renderer'] = new PhpADNSite\Renderer($config, $site['dataRetriever'], $site['user']);
-
-$site->get('/', function() use ($site) {
-	// Render the user timeline
-	return $site['renderer']->renderUserTimeline();
-});
-
-$site->get('/post/{postId}', function($postId) use ($site) {
-	// Render a single post
-	return $site['renderer']->renderPostPage($postId);
-});
-
-$site->run();
+class NoLocalADNUserException extends \Exception {
+	
+}

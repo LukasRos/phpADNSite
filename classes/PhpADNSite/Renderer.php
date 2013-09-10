@@ -1,6 +1,6 @@
 <?php
 
-/*  phpADNSite - Personal Website and Post Archive powered by app.net
+/*  phpADNSite - Personal Website and LocalPost Archive powered by app.net
  Copyright (C) 2013 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
@@ -30,15 +30,14 @@ class Renderer {
 
 	public function __construct($config, $dataRetriever) {
 		mb_internal_encoding("UTF-8");
-		
+
 		$this->twig = new \Twig_Environment(new \Twig_Loader_Filesystem('../templates/'.$config['template']),
 				array('cache' => '../tmp', 'autoescape' => false));
 		$this->variables = $config['variables'];
-		$this->variables['username'] = $config['username'];
 		$this->dataRetriever = $dataRetriever;
 	}
 
-	private function reformatPost(Entities\Post $post) {
+	private function reformatPost(Entities\LocalPost $post) {
 		$html = $post->getText();
 		$meta = $post->getMeta();
 		// Process Hashtags
@@ -46,13 +45,21 @@ class Renderer {
 		$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
 		$text = str_replace($entityText, '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" href="/hashtag/'.$entity['name'].'">'.$entityText.'</a>', $text);
 		} */
-		
+
 		// Process Links
 		foreach ($meta['entities']['links'] as $entity) {
 			$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
 			$html = str_replace($entityText, '<a href="'.$entity['url'].'">'.$entityText.'</a>', $html);
 		}
 		
+		// Process Users
+		foreach ($meta['entities']['mentions'] as $entity) {
+			$user = $this->dataRetriever->getRemoteUserByName($entity['name']);
+			if (!$user) continue;
+			$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
+			$html = str_replace($entityText, '<a href="'.$user->getProfileURL().'">'.$entityText.'</a>', $html);
+		}
+
 		$data = array(
 				'id' => $post->getADNPostId(),
 				'num_replies' => $meta['num_replies'],
@@ -62,45 +69,68 @@ class Renderer {
 				'has_thread' => ($meta['num_replies']>0 || isset($meta['reply_to'])),
 				'html' => $html
 		);
+		
+		if ($post->getRepostedFromUser()) {
+			// Add user information in case of repost
+			$user = $post->getRepostedFromUser();
+			$userMeta = $user->getMeta();
+			
+			$data['repost'] = true;
+			$data['user'] = array(
+				'username' => $user->getUsername(),
+				'name' => $userMeta['name'],
+				'url' => $user->getProfileURL(),
+				'avatar_image' => $userMeta['avatar_image']
+			);
+		}
 
 		return $data;
 	}
 
 	private function generateResponse($template, $data) {
 		$mergedData = array_merge($data, $this->variables);
+		$mergedData['username'] = $this->dataRetriever->getUser()->getUsername();
 		$tt = $this->twig->loadTemplate($template);
 		return $tt->render($mergedData);
 	}
 
 	/**
 	 * Renders a page that displays the timeline of latest posts from the owner of this instance
-	 * 
+	 *
 	 * @return string
 	 */
 	public function renderUsertimeline() {
-		$postsData = $this->dataRetriever->getUserTimeline();
-		$posts = array();
-		if (!$postsData) die("ERROR"); // TODO: Error handling
-		for ($i = 0; $i < count($postsData); $i++) {
-			$text = $postsData[$i]->getText();
-			if ($text[0]=='@') continue; // Filter directed posts
-			$posts[] = $this->reformatPost($postsData[$i]);
-		}
+		try {
+			$postsData = $this->dataRetriever->getUserTimeline();
+			$posts = array();
+			if (!$postsData) die("ERROR"); // TODO: Error handling
+			for ($i = 0; $i < count($postsData); $i++) {
+				$text = $postsData[$i]->getText();
+				//if ($text[0]=='@') continue; // Filter directed posts
+				$posts[] = $this->reformatPost($postsData[$i]);
+			}
 
-		return $this->generateResponse('home.twig.html', array('posts' => $posts));
+			return $this->generateResponse('home.twig.html', array('posts' => $posts));
+		} catch (Exceptions\NoLocalADNUserException $e) {
+			die("This instance has not been configured yet. Please run setup.");
+		}
 	}
 
 	/**
 	 * Renders a page that displays a single post from the owner of this instance.
-	 * 
+	 *
 	 * @param integer $postId The Post ID from app.net
 	 * @return string
 	 */
 	public function renderPostPage($postId) {
-		$post = $this->dataRetriever->getSinglePostById($postId);
-		if (!$post) die("ERROR"); // TODO: Error handling
+		try {
+			$post = $this->dataRetriever->getSinglePostById($postId);
+			if (!$post) die("ERROR"); // TODO: Error handling
 
-		return $this->generateResponse('postpage.twig.html', array('post' => $this->reformatPost($post)));
+			return $this->generateResponse('postpage.twig.html', array('post' => $this->reformatPost($post)));
+		} catch (Exceptions\NoLocalADNUserException $e) {
+			die("This instance has not been configured yet. Please run setup.");
+		}
 	}
 
 }

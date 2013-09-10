@@ -1,6 +1,6 @@
 <?php
 
-/*  phpADNSite - Personal Website and Post Archive powered by app.net
+/*  phpADNSite - Personal Website and LocalPost Archive powered by app.net
  Copyright (C) 2013 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
@@ -27,30 +27,68 @@ use Doctrine\ORM\EntityManager;
  */
 class DataRetriever {
 
-	private $apiClient;
-	private $username;
 	private $em;
-
-	public function __construct($username, EntityManager $em) {
-		$this->apiClient = new Client('https://alpha-api.app.net/');
-		$this->username = $username;
+	private $user;
+	private $apiClient;
+	
+	public function __construct(EntityManager $em, Entities\LocalUser $user = null) {
 		$this->em = $em;
+		$this->user = $user;
+		
+		$this->apiClient = new Client('https://alpha-api.app.net/stream/0/');
+	}
+	
+	public function getUser() {
+		return $this->user;
+	}
+	
+	private function getRemoteUser($query, $apiString) {
+		$user = $this->em->getRepository('PhpADNSite\Entities\RemoteUser')->findOneBy($query);
+		if ($user) {
+			if ($user->needsRefresh()) {
+				$response = $this->apiClient->get('users/'.$apiString.'?include_user_annotations=1')->send();
+				$content = json_decode($response->getBody(), true);
+		
+				$user->parseFromAPI($content['data']);
+			}
+		} else {
+			// Fetch from API
+			$response = $this->apiClient->get('users/'.$apiString.'?include_user_annotations=1')->send();
+			$content = json_decode($response->getBody(), true);
+		
+			$user = new Entities\RemoteUser();
+			$user->parseFromAPI($content['data']);
+			$this->em->persist($user);
+		}
+		$this->em->flush();
+		return $user;
+	}
+	
+	public function getRemoteUserByName($userName) {
+		return $this->getRemoteUser(array('username' => $userName), '@'.$userName);
+	}
+	
+	public function getRemoteUserById($userId) {
+		return $this->getRemoteUser(array('adn_user_id' => $userId), $userId);
 	}
 
 	public function getUserTimeline() {
-		$gr = $this->apiClient->get('stream/0/users/@'.$this->username.'/posts')->send();
+		if (!$this->user) throw new Exceptions\NoLocalADNUserException();
+		
+		$gr = $this->apiClient->get('users/'.$this->user->getADNUserId().'/posts')->send();
 		$content = json_decode($gr->getBody(), true);
+		var_dump($content['meta']);
 		$postData = $content['data'];
 		$posts = array();
 		foreach ($postData as $p) {
-			$post = $this->em->getRepository('PhpADNSite\Entities\Post')->findOneBy(array('adn_post_id' => $p['id']));
+			$post = $this->em->getRepository('PhpADNSite\Entities\LocalPost')->findOneBy(array('adn_post_id' => $p['id']));
 			if ($post) {
-				// Post already found in local database
-				if ($post->needsRefresh()) $post->parseFromAPI($p);
+				// LocalPost already found in local database
+				if ($post->needsRefresh()) $post->parseFromAPI($p, $this);
 			} else {
 				// Add post to database
-				$post = new Entities\Post();
-				$post->parseFromAPI($p);
+				$post = new Entities\LocalPost();
+				$post->parseFromAPI($p, $this);
 				$this->em->persist($post);
 			}
 			$posts[] = $post;
@@ -60,27 +98,27 @@ class DataRetriever {
 	}
 
 	public function getSinglePostById($postId) {
-		$post = $this->em->getRepository('PhpADNSite\Entities\Post')->findOneBy(array('adn_post_id' => $postId));
+		$post = $this->em->getRepository('PhpADNSite\Entities\LocalPost')->findOneBy(array('adn_post_id' => $postId));
 		if ($post) {
-			// Post already found in local database
+			// LocalPost already found in local database
 			if ($post->needsRefresh()) {
 				// Refresh needed?
-				$response = $this->apiClient->get('stream/0/posts/'.$postId.'?include_post_annotations=1')->send();
+				$response = $this->apiClient->get('posts/'.$postId.'?include_post_annotations=1&include_html=0')->send();
 				$content = json_decode($response->getBody(), true);
-				$post->parseFromAPI($content['data']);
+				$post->parseFromAPI($content['data'], $this);
 				$this->em->flush();
 			}
 			return $post;
 		} else {
 			// Fetch from API
 			try {
-				$response = $this->apiClient->get('stream/0/posts/'.$postId.'?include_post_annotations=1')->send();
+				$response = $this->apiClient->get('posts/'.$postId.'?include_post_annotations=1&include_html=0')->send();
 				$content = json_decode($response->getBody(), true);
 				// Only accept posts from site owner
 				if ($content['data']['user']['username']!=$this->username) return null;
 
-				$post = new Entities\Post();
-				$post->parseFromAPI($content['data']);
+				$post = new Entities\LocalPost();
+				$post->parseFromAPI($content['data'], $this);
 				$this->em->persist($post);
 				$this->em->flush();
 

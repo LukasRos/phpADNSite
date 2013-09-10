@@ -19,11 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace PhpADNSite\Entities;
 
+use PhpADNSite\DataRetriever;
+
 /**
  * Database representation of an app.net post created by the owner of this instance.
- * @Entity @Table(name="posts")
+ * @Entity @Table(name="pas_local_posts")
  **/
-class Post {
+class LocalPost {
 	
 	/** @Id @Column(type="integer") @GeneratedValue **/
 	private $id;
@@ -39,6 +41,9 @@ class Post {
 	
 	/** @Column(type="string") **/
 	private $text;
+	
+	/** @OneToOne(targetEntity="RemoteUser") **/
+	private $reposted_from_user;
 
 	/** @Column(type="string") **/
 	private $meta;
@@ -72,13 +77,17 @@ class Post {
 		return $this->text;
 	}
 	
+	public function getRepostedFromUser() {
+		return $this->reposted_from_user;
+	}
+	
 	public function getLastUpdated() {
 		return $this->last_updated;
 	}
 	
 	public function needsRefresh() {
 		$recentTime = new \DateTime();
-		$recentTime->modify('-5minute');
+		$recentTime->modify('-15minute');
 		return ($recentTime > $this->last_updated);
 	}
 	
@@ -91,17 +100,7 @@ class Post {
 	 * Parse and convert data from an app.net API response into the entity format.
 	 * @param array $postData
 	 */
-	public function parseFromAPI($postData) {
-		/*if (isset($postData['repost_of'])) {
-			$data['repost'] = true;
-			$data['user'] = array('username' => $post['repost_of']['user']['username'],
-					'name' => $post['repost_of']['user']['name'],
-					'avatar_image' => $post['repost_of']['user']['avatar_image']);
-			$data['html'] = PreProcessor::processEntities($post['repost_of']);
-		} else {
-			$data['repost'] = false;
-			$data['html'] = PreProcessor::processEntities($post);
-		} */
+	public function parseFromAPI($postData, DataRetriever $dataRetriever) {
 		foreach ($postData as $key => $value) {
 			switch ($key) {
 				case "created_at":
@@ -119,6 +118,22 @@ class Post {
 					if (in_array($key, array('num_stars', 'num_replies', 'source',
 							'num_reposts', 'entities', 'machine_only', 'annotations')))
 						$this->meta_array[$key] = $value;
+			}
+		}
+		if (isset($postData['repost_of'])) {
+			$this->reposted_from_user = $dataRetriever->getRemoteUserById($postData['repost_of']['user']['id']);
+			foreach ($postData['repost_of'] as $key => $value) {
+				switch ($key) {
+					case "created_at":
+						$this->created_at = new \DateTime($value);
+						break;
+					case "text":
+						$this->text = $value;
+						break;
+					default:
+						if (in_array($key, array('entities','annotations')))
+							$this->meta_array[$key] = $value;
+				}
 			}
 		}
 		$this->last_updated = new \DateTime();

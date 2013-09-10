@@ -44,7 +44,7 @@ class ConfigLoader {
 		// Initialize Doctrine ORM Service Provider
 		$app->register(new DoctrineOrmServiceProvider, array(
 				"orm.proxies_dir" => __DIR__."/../../../proxies",
-				"orm.auto_generate_proxies" => false,
+				"orm.auto_generate_proxies" => true,
 				"orm.em.options" => array(
 						"mappings" => array(
 								array(
@@ -58,6 +58,10 @@ class ConfigLoader {
 						"result_cache" => "apc"
 				)
 		));
+		
+		$localUser = $app['orm.em']->getRepository('PhpADNSite\Entities\LocalUser')->findAll();
+		if (count($localUser)==1) $app['user'] = $localUser[0];
+		else $app['user'] = null;
 
 		$app['debug'] = true;
 	}
