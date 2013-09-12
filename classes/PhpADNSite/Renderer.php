@@ -1,6 +1,6 @@
 <?php
 
-/*  phpADNSite - Personal Website and LocalPost Archive powered by app.net
+/*  phpADNSite - Personal Website and Post Archive powered by app.net
  Copyright (C) 2013 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
@@ -40,11 +40,12 @@ class Renderer {
 	private function reformatPost(Entities\LocalPost $post) {
 		$html = $post->getText();
 		$meta = $post->getMeta();
+		
 		// Process Hashtags
-		/*foreach ($meta['entities']['hashtags'] as $entity) {
-		$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
-		$text = str_replace($entityText, '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" href="/hashtag/'.$entity['name'].'">'.$entityText.'</a>', $text);
-		} */
+		foreach ($meta['entities']['hashtags'] as $entity) {
+			$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
+			$html = str_replace($entityText, '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" href="/hashtag/'.$entity['name'].'">'.$entityText.'</a>', $html);
+		}
 
 		// Process Links
 		foreach ($meta['entities']['links'] as $entity) {
@@ -52,7 +53,7 @@ class Renderer {
 			$html = str_replace($entityText, '<a href="'.$entity['url'].'">'.$entityText.'</a>', $html);
 		}
 		
-		// Process Users
+		// Process User Mentions
 		foreach ($meta['entities']['mentions'] as $entity) {
 			$user = $this->dataRetriever->getRemoteUserByName($entity['name']);
 			if (!$user) continue;
@@ -67,7 +68,7 @@ class Renderer {
 				'num_reposts' => $meta['num_reposts'],
 				'created_at' => $post->getCreatedAt(),
 				'has_thread' => ($meta['num_replies']>0 || isset($meta['reply_to'])),
-				'html' => $html
+				'html' => str_replace("\n", '<br />', $html)
 		);
 		
 		if ($post->getRepostedFromUser()) {
@@ -95,22 +96,36 @@ class Renderer {
 	}
 
 	/**
-	 * Renders a page that displays the timeline of latest posts from the owner of this instance
+	 * Renders a page that displays the timeline of latest posts from the owner of this instance.
 	 *
 	 * @return string
 	 */
-	public function renderUsertimeline() {
+	public function renderUserTimeline() {
 		try {
 			$postsData = $this->dataRetriever->getUserTimeline();
 			$posts = array();
 			if (!$postsData) die("ERROR"); // TODO: Error handling
-			for ($i = 0; $i < count($postsData); $i++) {
-				$text = $postsData[$i]->getText();
-				//if ($text[0]=='@') continue; // Filter directed posts
-				$posts[] = $this->reformatPost($postsData[$i]);
-			}
-
+			for ($i = 0; $i < count($postsData); $i++) $posts[] = $this->reformatPost($postsData[$i]);
+			
 			return $this->generateResponse('home.twig.html', array('posts' => $posts));
+		} catch (Exceptions\NoLocalADNUserException $e) {
+			die("This instance has not been configured yet. Please run setup.");
+		}
+	}
+	
+	/**
+	 * Renders a page that displays the timeline of latest conversation posts from the owner of this instance.
+	 *
+	 * @return string
+	 */
+	public function renderConversationTimeline() {
+		try {
+			$postsData = $this->dataRetriever->getConversationTimeline();
+			$posts = array();
+			if (!$postsData) die("ERROR"); // TODO: Error handling
+			for ($i = 0; $i < count($postsData); $i++) $posts[] = $this->reformatPost($postsData[$i]);
+	
+			return $this->generateResponse('conversations.twig.html', array('posts' => $posts));
 		} catch (Exceptions\NoLocalADNUserException $e) {
 			die("This instance has not been configured yet. Please run setup.");
 		}

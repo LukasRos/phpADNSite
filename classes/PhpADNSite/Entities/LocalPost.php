@@ -23,7 +23,7 @@ use PhpADNSite\DataRetriever;
 
 /**
  * Database representation of an app.net post created by the owner of this instance.
- * @Entity @Table(name="pas_local_posts")
+ * @Entity(repositoryClass="PhpADNSite\Repositories\LocalPostRepository") @Table(name="pas_local_posts")
  **/
 class LocalPost {
 	
@@ -44,6 +44,9 @@ class LocalPost {
 	
 	/** @OneToOne(targetEntity="RemoteUser") **/
 	private $reposted_from_user;
+	
+	/** @Column(type="boolean") **/
+	private $directed = false;
 
 	/** @Column(type="string") **/
 	private $meta;
@@ -77,6 +80,14 @@ class LocalPost {
 		return $this->text;
 	}
 	
+	public function isDirected() {
+		return $this->directed;
+	}
+	
+	public function isDirectedOrReply() {
+		return ($this->isDirected() || $this->getADNPostId()!=$this->getADNThreadId);
+	}
+	
 	public function getRepostedFromUser() {
 		return $this->reposted_from_user;
 	}
@@ -108,6 +119,7 @@ class LocalPost {
 					break;
 				case "text":
 					$this->text = $value;
+					$this->directed = ($value[0]=='@');
 					break;
 				case "id":
 					$this->adn_post_id = $value;
@@ -129,6 +141,7 @@ class LocalPost {
 						break;
 					case "text":
 						$this->text = $value;
+						$this->directed = ($value[0]=='@');
 						break;
 					default:
 						if (in_array($key, array('entities','annotations')))

@@ -44,10 +44,10 @@ class RemoteUser {
 	private $pas_post_url_template;
 	
 	/** @Column(type="boolean") **/
-	private $is_follower = 0;
+	private $is_follower = false;
 	
 	/** @Column(type="boolean") **/
-	private $is_following = 0;
+	private $is_following = false;
 	
 	/** @Column(type="datetime") **/
 	private $last_updated;

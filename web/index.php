@@ -23,6 +23,8 @@ ini_set("display_errors", 1);
 require_once "../vendor/autoload.php";
 $config = require "../config.php";
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
 $site = new Silex\Application();
 PhpADNSite\ConfigLoader::configure($site, $config);
 
@@ -30,13 +32,22 @@ $site['dataRetriever'] = new PhpADNSite\DataRetriever($site['orm.em'], $site['us
 $site['renderer'] = new PhpADNSite\Renderer($config, $site['dataRetriever'], $site['user']);
 
 $site->get('/', function() use ($site) {
-	// Render the user timeline
+	// Render the user's home timeline of original posts
 	return $site['renderer']->renderUserTimeline();
+});
+
+$site->get('/conversations', function() use ($site) {
+	// Render the user timeline of conversations
+	return $site['renderer']->renderConversationTimeline();
 });
 
 $site->get('/post/{postId}', function($postId) use ($site) {
 	// Render a single post
 	return $site['renderer']->renderPostPage($postId);
+});
+
+$site->get('/hashtag/{tag}', function($tag) {
+	return new RedirectResponse('https://alpha.app.net/hashtags/'.$tag);
 });
 
 $site->run();

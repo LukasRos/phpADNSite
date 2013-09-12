@@ -16,7 +16,7 @@ div.header-box, div.post-box {
 	box-shadow:3pt 3pt #aaa;
 }
 
-div.footer {
+div.footer, div.menu {
 	background-color:#fff;
 	text-align:center;
 	font-size:small;

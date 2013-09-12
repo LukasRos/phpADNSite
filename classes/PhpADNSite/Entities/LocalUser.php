@@ -69,6 +69,14 @@ class LocalUser {
 		$recentTime->modify('-5minute');
 		return ($recentTime > $this->stream_last_updated);
 	}
+
+	public function setProfileRefreshed() {
+		$this->profile_last_updated = new \DateTime();
+	}
+	
+	public function setStreamRefreshed() {
+		$this->stream_last_updated = new \DateTime();
+	}
 	
 	public function getMeta() {
 		if (!$this->meta_array) $this->meta_array = json_decode($this->meta, true);
