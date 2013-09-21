@@ -34,6 +34,9 @@ class LocalUser {
 	/** @Column(type="string") **/
 	private $meta;
 	
+	/** @Column(type="string", length=200) **/
+	private $bearer_access_token;
+	
 	/** @Column(type="datetime") **/
 	private $profile_last_updated;
 	
@@ -48,6 +51,10 @@ class LocalUser {
 	
 	public function getUsername() {
 		return $this->username;
+	}
+	
+	public function getBearerAccessToken() {
+		return $this->bearer_access_token;
 	}
 	
 	public function getProfileLastUpdated() {
@@ -70,10 +77,6 @@ class LocalUser {
 		return ($recentTime > $this->stream_last_updated);
 	}
 
-	public function setProfileRefreshed() {
-		$this->profile_last_updated = new \DateTime();
-	}
-	
 	public function setStreamRefreshed() {
 		$this->stream_last_updated = new \DateTime();
 	}
@@ -85,10 +88,22 @@ class LocalUser {
 	
 	/**
 	 * Parse and convert data from an app.net API response into the entity format.
-	 * @param array $postData
+	 * @param array $userData
 	 */
-	public function parseFromAPI($postData) {
-		// TODO
+	public function parseFromAPI($userData) {
+		foreach ($userData as $key => $value) {
+			switch ($key) {
+				case "username":
+					$this->username = $value;
+					break;
+				default:
+					if (in_array($key, array('avatar_image', 'name', 'annotations')))
+						$this->meta_array[$key] = $value;
+			}
+		}
+				
+		$this->profile_last_updated = new \DateTime();
+		$this->meta = json_encode($this->meta_array);
 	}
 	
 }

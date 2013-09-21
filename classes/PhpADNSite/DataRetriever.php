@@ -35,7 +35,21 @@ class DataRetriever {
 		$this->em = $em;
 		$this->user = $user;
 
+		// Initialize Client
 		$this->apiClient = new Client('https://alpha-api.app.net/stream/0/');
+		// Add Authentication if available
+		if ($this->user->getBearerAccessToken()) $this->apiClient->setDefaultHeaders(array(
+			'Authorization' => 'Bearer '.$this->user->getBearerAccessToken()
+		));
+		
+		// Refresh profile is required
+		if ($this->user->profileNeedsRefresh()) {
+			$response = $this->apiClient->get('users/'.$this->user->getADNUserId().'?include_user_annotations=1')->send();
+			$content = json_decode($response->getBody(), true);
+			
+			$this->user->parseFromAPI($content['data']);
+			$this->em->flush();
+		}
 	}
 
 	public function getUser() {
@@ -105,7 +119,7 @@ class DataRetriever {
 		$this->em->flush();
 	}
 
-	private function refreshPost(LocalPost $post) {
+	private function refreshSinglePost(Entities\LocalPost $post) {
 		try {
 			$response = $this->apiClient->get('posts/'.$post->getADNPostId()
 					.'?include_post_annotations=1&include_html=0')->send();
@@ -114,6 +128,34 @@ class DataRetriever {
 			$this->em->flush();
 		} catch (\Exception $e) {
 			// silently ignore
+		}
+	}
+
+	private function refreshMultiplePosts(array $posts) {
+		if ($this->user->getBearerAccessToken()) {
+			$idArray = array();
+			$idPostAssoc = array();
+			foreach ($posts as $p) {
+				if (get_class($p)=="PhpADNSite\Entities\LocalPost") {
+					$idArray[] = $p->getADNPostId();
+					$idPostAssoc[$p->getADNPostId()] = $p;
+				}
+			}
+			try {
+				$response = $this->apiClient->get('posts?ids='.implode(',', $idArray)
+						.'&include_post_annotations=1&include_html=0')->send();
+				$content = json_decode($response->getBody(), true);
+				foreach ($content['data'] as $postData) {
+					$id = $postData['id'];
+					$idPostAssoc[$id]->parseFromAPI($postData, $this);
+				}
+				$this->em->flush();
+			} catch (\Exception $e) {
+				// silently ignore
+			}
+		} else {
+			// If no authentication is available, fall back to single post retrieval
+			foreach ($posts as $p) $this->refreshSinglePost($p);
 		}
 	}
 
@@ -128,7 +170,9 @@ class DataRetriever {
 		if ($this->user->streamNeedsRefresh()) $this->refreshStream();
 
 		$posts = $this->em->getRepository('PhpADNSite\Entities\LocalPost')->getRecentOriginalPosts($maxResults);
-		foreach ($posts as $p) if ($p->needsRefresh()) $this->refreshPost($p);
+		$postsToRefresh = array();
+		foreach ($posts as $p) if ($p->needsRefresh()) $postsToRefresh[] = $p;
+		if (count($postsToRefresh)>0) $this->refreshMultiplePosts($postsToRefresh);
 		return $posts;
 	}
 
@@ -143,7 +187,9 @@ class DataRetriever {
 		if ($this->user->streamNeedsRefresh()) $this->refreshStream();
 
 		$posts = $this->em->getRepository('PhpADNSite\Entities\LocalPost')->getRecentConversationPosts($maxResults);
-		foreach ($posts as $p) if ($p->needsRefresh()) $this->refreshPost($p);
+		$postsToRefresh = array();
+		foreach ($posts as $p) if ($p->needsRefresh()) $postsToRefresh[] = $p;
+		if (count($postsToRefresh)>0) $this->refreshMultiplePosts($postsToRefresh);
 		return $posts;
 	}
 
@@ -156,7 +202,7 @@ class DataRetriever {
 		$post = $this->em->getRepository('PhpADNSite\Entities\LocalPost')->findOneBy(array('adn_post_id' => $postId));
 		if ($post) {
 			// LocalPost already found in local database
-			if ($post->needsRefresh()) $this->refreshPost($post);
+			if ($post->needsRefresh()) $this->refreshSinglePost($post);
 			return $post;
 		} else {
 			// Fetch from API

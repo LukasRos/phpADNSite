@@ -121,7 +121,7 @@ class RemoteUser {
 		}
 				
 		$this->last_updated = new \DateTime();
-		$this->meta = json_encode($this->meta_array);	
+		$this->meta = json_encode($this->meta_array);
 	}
 	
 }
