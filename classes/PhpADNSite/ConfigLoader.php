@@ -43,7 +43,7 @@ class ConfigLoader {
 
 		// Initialize Doctrine ORM Service Provider
 		$app->register(new DoctrineOrmServiceProvider, array(
-				"orm.proxies_dir" => __DIR__."/../../../proxies",
+				"orm.proxies_dir" => __DIR__."/../../proxies",
 				"orm.auto_generate_proxies" => true,
 				"orm.em.options" => array(
 						"mappings" => array(

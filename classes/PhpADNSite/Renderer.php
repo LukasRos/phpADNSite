@@ -89,8 +89,10 @@ class Renderer {
 	}
 
 	private function generateResponse($template, $data) {
-		$mergedData = array_merge($data, $this->variables);
-		$mergedData['username'] = $this->dataRetriever->getUser()->getUsername();
+		$mergedData = array_merge($data, $this->variables, array(
+			'username' => $this->dataRetriever->getUser()->getUsername(),
+			'user' => $this->dataRetriever->getUser()->getMeta()
+		));
 		$tt = $this->twig->loadTemplate($template);
 		return $tt->render($mergedData);
 	}
@@ -105,7 +107,11 @@ class Renderer {
 			$postsData = $this->dataRetriever->getUserTimeline();
 			$posts = array();
 			if (!$postsData) die("ERROR"); // TODO: Error handling
-			for ($i = 0; $i < count($postsData); $i++) $posts[] = $this->reformatPost($postsData[$i]);
+			for ($i = 0; $i < count($postsData); $i++) {
+				$posts[] = array_merge($this->reformatPost($postsData[$i]), array(
+					'firstOnDay' =>	($i==0 || $postsData[$i-1]->getCreatedAt()->format('Ymd')!=$postsData[$i]->getCreatedAt()->format('Ymd'))
+				));
+			}
 			
 			return $this->generateResponse('home.twig.html', array('posts' => $posts));
 		} catch (Exceptions\NoLocalADNUserException $e) {
@@ -123,8 +129,12 @@ class Renderer {
 			$postsData = $this->dataRetriever->getConversationTimeline();
 			$posts = array();
 			if (!$postsData) die("ERROR"); // TODO: Error handling
-			for ($i = 0; $i < count($postsData); $i++) $posts[] = $this->reformatPost($postsData[$i]);
-	
+			for ($i = 0; $i < count($postsData); $i++) {
+				$posts[] = array_merge($this->reformatPost($postsData[$i]), array(
+					'firstOnDay' =>	($i==0 || $postsData[$i-1]->getCreatedAt()->format('Ymd')!=$postsData[$i]->getCreatedAt()->format('Ymd'))
+				));
+			}
+			
 			return $this->generateResponse('conversations.twig.html', array('posts' => $posts));
 		} catch (Exceptions\NoLocalADNUserException $e) {
 			die("This instance has not been configured yet. Please run setup.");
@@ -142,7 +152,8 @@ class Renderer {
 			$post = $this->dataRetriever->getSinglePostById($postId);
 			if (!$post) die("ERROR"); // TODO: Error handling
 
-			return $this->generateResponse('postpage.twig.html', array('post' => $this->reformatPost($post)));
+			return $this->generateResponse('postpage.twig.html',
+					array('post' => array_merge($this->reformatPost($post), array('firstOnDay' => true))));
 		} catch (Exceptions\NoLocalADNUserException $e) {
 			die("This instance has not been configured yet. Please run setup.");
 		}
