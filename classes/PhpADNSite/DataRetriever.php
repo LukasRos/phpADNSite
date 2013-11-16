@@ -21,6 +21,7 @@ namespace PhpADNSite;
 
 use Guzzle\Http\Client;
 use Doctrine\ORM\EntityManager;
+use Opengraph\Reader;
 
 /**
  * Retrieves data such as posts from either the local database or the app.net API.
@@ -223,5 +224,36 @@ class DataRetriever {
 				return null;
 			}
 		}
+	}
+	
+	/**
+	 * Fetches meta data and an HTML embed code for the given URL (external link). 
+	 * @param string $url
+	 */
+	public function getExternalPageData($url) {
+		$externalPage = $this->em->getRepository('PhpADNSite\Entities\ExternalPage')->findOneBy(array('posted_url' => $url));
+		if (!$externalPage) {
+			$externalPage = new Entities\ExternalPage();
+			$externalPage->setPostedURL($url);
+			try {
+				$client = new Client();
+				$response = $client->get($url)->send();
+				$externalPage->setFinalURL($response->getEffectiveUrl());
+				$reader = new Reader();
+				$reader->parse($response->getBody(true));
+				$externalPage->setSerializedMeta($reader->getArrayCopy());
+			} catch (\Exception $e) {
+				return null;
+			}
+			$this->em->persist($externalPage);
+			$this->em->flush();
+		}
+		
+		return array(
+			'url' => $externalPage->getFinalURL(),
+			'title' => $externalPage->hasMetaField('og:title') ? $externalPage->getMetaField('og:title') : $externalPage->getFinalURL(), 
+			'html' => $externalPage->getEmbedHTML()
+		);
+		
 	}
 }

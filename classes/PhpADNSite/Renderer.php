@@ -50,7 +50,17 @@ class Renderer {
 		// Process Links
 		foreach ($meta['entities']['links'] as $entity) {
 			$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
-			$html = str_replace($entityText, '<a href="'.$entity['url'].'">'.$entityText.'</a>', $html);
+			$embed = $this->dataRetriever->getExternalPageData($entity['url']);
+			if ($embed && $embed['html']) {
+				// embedded media
+				$html = str_replace($entityText, '<span class="embed">'.$embed['html'].'</span><span class="embed-footer"><a href="'.$entity['url'].'">'.$embed['title'].'</a></span>', $html);
+			} elseif ($embed && $entityText==$entity['url']) {
+				// extend shortened 
+				$html = str_replace($entityText, '<a href="'.$entity['url'].'" title="'.$embed['url'].'">'.$entityText.'</a>', $html);
+			} else {
+				// default link without meta data
+				$html = str_replace($entityText, '<a href="'.$entity['url'].'">'.$entityText.'</a>', $html);
+			}
 		}
 		
 		// Process User Mentions
