@@ -62,7 +62,13 @@ class ConfigLoader {
 		$localUser = $app['orm.em']->getRepository('PhpADNSite\Entities\LocalUser')->findAll();
 		if (count($localUser)==1) $app['user'] = $localUser[0];
 		else $app['user'] = null;
-
+		
+		if (isset($config['adn.client_id']) && isset($config['adn.client_secret'])
+				&& $config['adn.client_id']!='' && $config['adn.client_secret']!='') {
+			$app['client_id'] = $config['adn.client_id'];
+			$app['client_secret'] = $config['adn.client_secret'];
+		}
+		
 		$app['debug'] = true;
 	}
 

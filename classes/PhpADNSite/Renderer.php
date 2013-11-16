@@ -40,7 +40,7 @@ class Renderer {
 	private function reformatPost(Entities\LocalPost $post) {
 		$html = $post->getText();
 		$meta = $post->getMeta();
-		
+
 		// Process Hashtags
 		foreach ($meta['entities']['hashtags'] as $entity) {
 			$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
@@ -55,14 +55,14 @@ class Renderer {
 				// embedded media
 				$html = str_replace($entityText, '<span class="embed">'.$embed['html'].'</span><span class="embed-footer"><a href="'.$entity['url'].'">'.$embed['title'].'</a></span>', $html);
 			} elseif ($embed && $entityText==$entity['url']) {
-				// extend shortened 
+				// extend shortened
 				$html = str_replace($entityText, '<a href="'.$entity['url'].'" title="'.$embed['url'].'">'.$entityText.'</a>', $html);
 			} else {
 				// default link without meta data
 				$html = str_replace($entityText, '<a href="'.$entity['url'].'">'.$entityText.'</a>', $html);
 			}
 		}
-		
+
 		// Process User Mentions
 		foreach ($meta['entities']['mentions'] as $entity) {
 			$user = $this->dataRetriever->getRemoteUserByName($entity['name']);
@@ -80,18 +80,18 @@ class Renderer {
 				'has_thread' => ($meta['num_replies']>0 || isset($meta['reply_to'])),
 				'html' => str_replace("\n", '<br />', $html)
 		);
-		
+
 		if ($post->getRepostedFromUser()) {
 			// Add user information in case of repost
 			$user = $post->getRepostedFromUser();
 			$userMeta = $user->getMeta();
-			
+				
 			$data['repost'] = true;
 			$data['user'] = array(
-				'username' => $user->getUsername(),
-				'name' => $userMeta['name'],
-				'url' => $user->getProfileURL(),
-				'avatar_image' => $userMeta['avatar_image']
+					'username' => $user->getUsername(),
+					'name' => $userMeta['name'],
+					'url' => $user->getProfileURL(),
+					'avatar_image' => $userMeta['avatar_image']
 			);
 		}
 
@@ -100,8 +100,8 @@ class Renderer {
 
 	private function generateResponse($template, $data) {
 		$mergedData = array_merge($data, $this->variables, array(
-			'username' => $this->dataRetriever->getUser()->getUsername(),
-			'user' => $this->dataRetriever->getUser()->getMeta()
+				'username' => $this->dataRetriever->getUser()->getUsername(),
+				'user' => $this->dataRetriever->getUser()->getMeta()
 		));
 		$tt = $this->twig->loadTemplate($template);
 		return $tt->render($mergedData);
@@ -113,42 +113,34 @@ class Renderer {
 	 * @return string
 	 */
 	public function renderUserTimeline() {
-		try {
-			$postsData = $this->dataRetriever->getUserTimeline();
-			$posts = array();
-			if (!$postsData) die("ERROR"); // TODO: Error handling
-			for ($i = 0; $i < count($postsData); $i++) {
-				$posts[] = array_merge($this->reformatPost($postsData[$i]), array(
+		$postsData = $this->dataRetriever->getUserTimeline();
+		$posts = array();
+		if (!$postsData) die("ERROR"); // TODO: Error handling
+		for ($i = 0; $i < count($postsData); $i++) {
+			$posts[] = array_merge($this->reformatPost($postsData[$i]), array(
 					'firstOnDay' =>	($i==0 || $postsData[$i-1]->getCreatedAt()->format('Ymd')!=$postsData[$i]->getCreatedAt()->format('Ymd'))
-				));
-			}
-			
-			return $this->generateResponse('home.twig.html', array('posts' => $posts));
-		} catch (Exceptions\NoLocalADNUserException $e) {
-			die("This instance has not been configured yet. Please run setup.");
+			));
 		}
+			
+		return $this->generateResponse('home.twig.html', array('posts' => $posts));
 	}
-	
+
 	/**
 	 * Renders a page that displays the timeline of latest conversation posts from the owner of this instance.
 	 *
 	 * @return string
 	 */
 	public function renderConversationTimeline() {
-		try {
-			$postsData = $this->dataRetriever->getConversationTimeline();
-			$posts = array();
-			if (!$postsData) die("ERROR"); // TODO: Error handling
-			for ($i = 0; $i < count($postsData); $i++) {
-				$posts[] = array_merge($this->reformatPost($postsData[$i]), array(
+		$postsData = $this->dataRetriever->getConversationTimeline();
+		$posts = array();
+		if (!$postsData) die("ERROR"); // TODO: Error handling
+		for ($i = 0; $i < count($postsData); $i++) {
+			$posts[] = array_merge($this->reformatPost($postsData[$i]), array(
 					'firstOnDay' =>	($i==0 || $postsData[$i-1]->getCreatedAt()->format('Ymd')!=$postsData[$i]->getCreatedAt()->format('Ymd'))
-				));
-			}
-			
-			return $this->generateResponse('conversations.twig.html', array('posts' => $posts));
-		} catch (Exceptions\NoLocalADNUserException $e) {
-			die("This instance has not been configured yet. Please run setup.");
+			));
 		}
+			
+		return $this->generateResponse('conversations.twig.html', array('posts' => $posts));
 	}
 
 	/**
@@ -158,15 +150,11 @@ class Renderer {
 	 * @return string
 	 */
 	public function renderPostPage($postId) {
-		try {
-			$post = $this->dataRetriever->getSinglePostById($postId);
-			if (!$post) die("ERROR"); // TODO: Error handling
+		$post = $this->dataRetriever->getSinglePostById($postId);
+		if (!$post) die("ERROR"); // TODO: Error handling
 
-			return $this->generateResponse('postpage.twig.html',
-					array('post' => array_merge($this->reformatPost($post), array('firstOnDay' => true))));
-		} catch (Exceptions\NoLocalADNUserException $e) {
-			die("This instance has not been configured yet. Please run setup.");
-		}
+		return $this->generateResponse('postpage.twig.html',
+				array('post' => array_merge($this->reformatPost($post), array('firstOnDay' => true))));
 	}
 
 }

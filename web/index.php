@@ -21,15 +21,29 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 require_once "../vendor/autoload.php";
-$config = require "../config.php";
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request, Symfony\Component\HttpFoundation\RedirectResponse;
 
 $site = new Silex\Application();
-PhpADNSite\ConfigLoader::configure($site, $config);
+$site['config'] = require "../config.php";
 
-$site['dataRetriever'] = new PhpADNSite\DataRetriever($site['orm.em'], $site['user']);
-$site['renderer'] = new PhpADNSite\Renderer($config, $site['dataRetriever'], $site['user']);
+$site->error(function(Exception $e) use ($site) {
+	$twig = new \Twig_Environment(new \Twig_Loader_Filesystem('../pages'),
+			array('cache' => '../tmp'));
+	
+	if (get_class($e)=='PhpADNSite\Exceptions\NoLocalADNUserException') {
+		return $twig->render('notsetup.twig.html', array());
+	} else {
+		return $twig->render('error.twig.html', array('message' => $e->getMessage()));
+	}
+});
+
+$site->before(function() use ($site) {
+	PhpADNSite\ConfigLoader::configure($site, $site['config']);
+	
+	$site['dataRetriever'] = new PhpADNSite\DataRetriever($site['orm.em'], $site['user']);
+	$site['renderer'] = new PhpADNSite\Renderer($site['config'], $site['dataRetriever'], $site['user']);
+});
 
 $site->get('/', function() use ($site) {
 	// Render the user's home timeline of original posts
@@ -48,6 +62,38 @@ $site->get('/post/{postId}', function($postId) use ($site) {
 
 $site->get('/hashtag/{tag}', function($tag) {
 	return new RedirectResponse('https://alpha.app.net/hashtags/'.$tag);
+});
+
+$site->get('/setup', function(Request $r) use ($site) {
+	// Start setup flow
+	if ($site['user']) return new RedirectResponse('/');
+	
+	$url =	'https://account.app.net/oauth/authenticate?client_id='.$site['client_id']
+		.	'&response_type=code&redirect_uri=http://'.$r->getHost().'/return'
+		.	'&scope=stream';
+	return new RedirectResponse($url);
+});
+
+$site->get('/return', function(Request $r) use ($site) {
+	// Return from setup flow
+	if ($site['user']) return new RedirectResponse('/');
+	if (!$r->query->has('code')) throw new Exception('No code returned from authorization.');
+	
+	$client = new Guzzle\Http\Client('https://account.app.net/');
+	$response = $client->post('/oauth/access_token', null, array(
+		'client_id' => $site['client_id'],
+		'client_secret' => $site['client_secret'],
+		'grant_type' => 'authorization_code',
+		'redirect_uri' => 'http://'.$r->getHost().'/return',
+		'code' => $r->query->get('code')
+	))->send();
+
+	$data = $response->json();
+	if ($data && isset($data['access_token'])) {
+		$site['dataRetriever']->configureUserWithOAuthToken($data['access_token']);
+		
+		return new RedirectResponse('/');		
+	} else throw new Exception('No access token returned from authorization.');
 });
 
 $site->run();

@@ -38,17 +38,38 @@ class DataRetriever {
 
 		// Initialize Client
 		$this->apiClient = new Client('https://alpha-api.app.net/stream/0/');
-		// Add Authentication if available
-		if ($this->user->getBearerAccessToken()) $this->apiClient->setDefaultHeaders(array(
-			'Authorization' => 'Bearer '.$this->user->getBearerAccessToken()
-		));
-		
-		// Refresh profile is required
-		if ($this->user->profileNeedsRefresh()) {
-			$response = $this->apiClient->get('users/'.$this->user->getADNUserId().'?include_user_annotations=1')->send();
-			$content = json_decode($response->getBody(), true);
+
+		if ($this->user) {
+			// Add authorization
+			$this->apiClient->setDefaultHeaders(array(
+					'Authorization' => 'Bearer '.$this->user->getBearerAccessToken()
+			));
+
+			// Refresh profile is required
+			if ($this->user->profileNeedsRefresh()) {
+				$response = $this->apiClient->get('users/'.$this->user->getADNUserId().'?include_user_annotations=1')->send();
+				$content = json_decode($response->getBody(), true);
+					
+				$this->user->parseFromAPI($content['data']);
+				$this->em->flush();
+			}
+		}
+	}
+
+	public function configureUserWithOAuthToken($token) {
+		if (!$this->user) {
+			$this->user = new Entities\LocalUser($token);
 			
+			$this->apiClient->setDefaultHeaders(array(
+					'Authorization' => 'Bearer '.$this->user->getBearerAccessToken()
+			));
+
+			$response = $this->apiClient->get('users/me?include_user_annotations=1')->send();
+			$content = $response->json();
+
 			$this->user->parseFromAPI($content['data']);
+			
+			$this->em->persist($this->user);
 			$this->em->flush();
 		}
 	}
@@ -163,7 +184,6 @@ class DataRetriever {
 	/**
 	 * Returns the user timeline which contains all original posts (no directed posts or replies) and reposts from the local instance owner.
 	 * @param number $maxResults
-	 * @throws Exceptions\NoLocalADNUserException
 	 * @return An array of Posts
 	 */
 	public function getUserTimeline($maxResults = 20) {
@@ -180,7 +200,6 @@ class DataRetriever {
 	/**
 	 * Returns the conversation timeline which contains all directed posts and replies from the local instance owner.
 	 * @param number $maxResults
-	 * @throws Exceptions\NoLocalADNUserException
 	 * @return An array of Posts
 	 */
 	public function getConversationTimeline($maxResults = 20) {
@@ -200,6 +219,8 @@ class DataRetriever {
 	 * @return unknown|NULL|\PhpADNSite\Entities\LocalPost
 	 */
 	public function getSinglePostById($postId) {
+		if (!$this->user) throw new Exceptions\NoLocalADNUserException();
+
 		$post = $this->em->getRepository('PhpADNSite\Entities\LocalPost')->findOneBy(array('adn_post_id' => $postId));
 		if ($post) {
 			// LocalPost already found in local database

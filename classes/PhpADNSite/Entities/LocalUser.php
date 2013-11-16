@@ -45,6 +45,10 @@ class LocalUser {
 	
 	private $meta_array = null;
 	
+	public function __construct($bearer_access_token) {
+		$this->bearer_access_token = $bearer_access_token;
+	}
+	
 	public function getADNUserId() {
 		return $this->adn_user_id;
 	}
@@ -93,6 +97,9 @@ class LocalUser {
 	public function parseFromAPI($userData) {
 		foreach ($userData as $key => $value) {
 			switch ($key) {
+				case "id":
+					$this->adn_user_id = $value;
+					break;
 				case "username":
 					$this->username = $value;
 					break;
