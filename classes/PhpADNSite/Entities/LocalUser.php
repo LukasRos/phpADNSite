@@ -32,6 +32,9 @@ class LocalUser {
 	private $username;
 	
 	/** @Column(type="string") **/
+	private $domain;
+	
+	/** @Column(type="string") **/
 	private $meta;
 	
 	/** @Column(type="string", length=200) **/
@@ -55,6 +58,10 @@ class LocalUser {
 	
 	public function getUsername() {
 		return $this->username;
+	}
+	
+	public function getDomain() {
+		return $this->domain;
 	}
 	
 	public function getBearerAccessToken() {
@@ -103,6 +110,8 @@ class LocalUser {
 				case "username":
 					$this->username = $value;
 					break;
+				case "verified_domain":
+					$this->domain = $value;
 				default:
 					if (in_array($key, array('avatar_image', 'name', 'annotations')))
 						$this->meta_array[$key] = $value;

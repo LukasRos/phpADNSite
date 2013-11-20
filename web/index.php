@@ -28,26 +28,34 @@ $site = new Silex\Application();
 $site['config'] = require "../config.php";
 
 $site->error(function(Exception $e) use ($site) {
-	$twig = new \Twig_Environment(new \Twig_Loader_Filesystem('../pages'),
-			array('cache' => '../tmp'));
+	if (!isset($site['renderer'])) $site['renderer'] = new PhpADNSite\Renderer($site['config']);
 	
 	if (get_class($e)=='PhpADNSite\Exceptions\NoLocalADNUserException') {
-		return $twig->render('notsetup.twig.html', array());
+		return $site['renderer']->generateUnthemedResponse('notsetup.twig.html', array());
 	} else {
-		return $twig->render('error.twig.html', array('message' => $e->getMessage()));
+		return $site['renderer']->generateUnthemedResponse('error.twig.html', array('message' => $e->getMessage()));
 	}
 });
 
-$site->before(function() use ($site) {
+$site->before(function(Request $r) use ($site) {
 	PhpADNSite\ConfigLoader::configure($site, $site['config']);
 	
 	$site['dataRetriever'] = new PhpADNSite\DataRetriever($site['orm.em'], $site['user']);
-	$site['renderer'] = new PhpADNSite\Renderer($site['config'], $site['dataRetriever'], $site['user']);
+	$site['renderer'] = new PhpADNSite\Renderer($site['config'], $site['dataRetriever']);
+	
+	if ($site['user'] && $r->getHost()!='localhost' && $r->getHost()!=$site['user']->getDomain()) {
+		return new RedirectResponse('http://'.$site['user']->getDomain().$r->getPathInfo());
+	}
 });
 
 $site->get('/', function() use ($site) {
 	// Render the user's home timeline of original posts
 	return $site['renderer']->renderUserTimeline();
+});
+
+$site->get('/rss', function() use ($site) {
+	// Render the user's RSS feed of original posts
+	return $site['renderer']->renderUserTimelineFeed();
 });
 
 $site->get('/conversations', function() use ($site) {

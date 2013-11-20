@@ -101,11 +101,11 @@ class ExternalPage {
 			case 'video':
 				$vdata = $data['og:video'][0];
 				// width="'.$vdata['og:video:width'].'" height="'.$vdata['og:video:height'].'"
-				$html = '<embed name="player1" type="application/x-shockwave-flash" src="'.$vdata['og:video:url'].'" style="width:400pt; height:225pt;" />';
+				$html = '<embed name="player1" type="application/x-shockwave-flash" src="'.htmlspecialchars($vdata['og:video:url']).'" style="width:400pt; height:225pt;" />';
 				break;
 			case 'article':
 				$idata = $data['og:image'][0];
-				$html = '<img src="'.$idata['og:image:url'].'" class="thumbnail" /><strong>'.$data['og:title'].'</strong><br />'.$data['og:description'];
+				$html = '<img src="'.$idata['og:image:url'].'" class="thumbnail" /><strong>'.$data['og:title'].'</strong><br />'.@$data['og:description'];
 				break;
 			default:
 				$html = null;
