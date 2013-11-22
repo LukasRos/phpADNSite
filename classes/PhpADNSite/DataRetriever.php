@@ -258,12 +258,19 @@ class DataRetriever {
 			$externalPage->setPostedURL($url);
 			try {
 				$client = new Client();
-				$response = $client->get($url)->send();
+				$request = $client->get($url);
+				$request->getCurlOptions()->set(CURLOPT_TIMEOUT, 5);
+				$response = $request->send();
 				$externalPage->setFinalURL($response->getEffectiveUrl());
 				$reader = new Reader();
 				$reader->parse($response->getBody(true));
 				$externalPage->setSerializedMeta($reader->getArrayCopy());
 			} catch (\Exception $e) {
+				// store default entry in case of errors
+				$externalPage->setFinalURL($url)
+					->setSerializedMeta(array());
+				$this->em->persist($externalPage);
+				$this->em->flush();
 				return null;
 			}
 			$this->em->persist($externalPage);
