@@ -1,0 +1,159 @@
+body {
+	background-color: #444;
+	font-family:Calibri, "Lucida Grande", sans-serif;
+	font-size:16px;
+}
+
+a:hover {
+	text-decoration:none;
+}
+
+/* Sidebar Styles */
+
+h1 {
+	font-size:20px;
+	text-align:center;
+}
+
+#user-profile-sidebar {
+	background:#000;
+	color:#fff;
+	position:fixed;
+	top:0;
+	bottom:0;
+	left:0;
+	width:330px;
+}
+
+#user-profile-sidebar p {
+	text-align:center;
+}
+
+#user-profile-sidebar p img {
+	border-radius:25%;
+	border:solid 1px #fff;	
+}
+
+#user-profile-sidebar i.fa {
+	padding:5px 10px 5px 10px;
+	width:16px;	
+}
+
+#user-profile-sidebar a {
+	color:#fff;
+}
+
+#user-profile-sidebar li {
+	list-style-type:none;
+}
+
+#pas-attribution {
+	font-size:10px;
+}
+
+/* Post/Content Styles */
+
+div.post-box, div.date-box {
+	border-radius:3px;
+	background-color:#fff;
+	border:solid 1px;
+	box-shadow:2px 2px #222;
+	padding:10px;
+}
+
+div.post-box, div.date-box {
+	border-color:#ccc;
+	margin-left:auto;
+}
+
+div.post-box {
+	margin:5px 0px 15px 360px;
+}
+
+div.post-box p {
+	line-height:22px;
+}
+
+div.post-box i.fa, div.date-box i.fa {
+	width:20px;	
+}
+
+div.date-box {
+	border-color:#ccc;
+	background-color:#ccc;
+	width:120px;
+	padding:3px;
+	text-align:center;
+	margin-top:20px;
+}
+
+p.time-box {
+	background-color:#ccc;
+	margin:-11px;
+	padding:5px;
+	width:80px;
+	border-radius:3px;
+	text-align:center;
+}
+
+p.permalink-box {
+	background-color:#ccc;
+	margin:-11px 0 -11px auto;
+	padding:5px;
+	width:30px;
+	border-radius:3px;
+	text-align:center;
+}
+
+a {
+	color:#444;
+}
+
+p.permalink-box a {
+	color:#fff;
+	text-decoration:none;
+}
+
+p.post-repost-header {
+	background-color:#eee;
+	padding:5px;
+	border-radius:3px;
+}
+
+/* Reposts */
+
+div.post-box blockquote {
+	border-left:1px #222 dotted;
+	padding-left:10px;	
+}
+
+p.post-repost-header img {
+	margin-bottom:-3px;
+	width:16px;
+	height:16px;
+}
+
+/* Post Embeds */
+
+span.embed-text, span.embed-media {
+	display:block;
+	margin:1px;
+	padding:8px;
+}
+
+span.embed-media {
+	text-align:center;	
+}
+
+span.embed-text {
+	border:1px #ddd solid;
+	font-size:14px;
+	min-height:80px;
+}
+
+span.embed-text img.thumbnail {
+	float:left;
+	width:100px;
+	margin-right:10px;
+	max-height:70px;
+}
