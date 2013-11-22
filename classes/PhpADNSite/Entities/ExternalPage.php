@@ -95,17 +95,17 @@ class ExternalPage {
 				$url = parse_url($mdata['og:audio:url']);
 				if ($url['scheme']=='spotify') {
 					// Spotify Embedded Track
-					$html = '<iframe src="https://embed.spotify.com/?uri=spotify:'.$url['path'].'" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>';
+					$html = '<span class="embed-media"><iframe src="https://embed.spotify.com/?uri=spotify:'.$url['path'].'" width="300" height="80" frameborder="0" allowtransparency="true"></iframe></span>';
 				}
 				break;
 			case 'video':
 				$vdata = $data['og:video'][0];
 				// width="'.$vdata['og:video:width'].'" height="'.$vdata['og:video:height'].'"
-				$html = '<embed name="player1" type="application/x-shockwave-flash" src="'.htmlspecialchars($vdata['og:video:url']).'" style="width:400pt; height:225pt;" />';
+				$html = '<span class="embed-media"><embed name="player1" type="application/x-shockwave-flash" src="'.htmlspecialchars($vdata['og:video:url']).'" style="width:500px; height:280px;" /></span>';
 				break;
 			case 'article':
 				$idata = $data['og:image'][0];
-				$html = '<img src="'.$idata['og:image:url'].'" class="thumbnail" /><strong>'.$data['og:title'].'</strong><br />'.@$data['og:description'];
+				$html = '<span class="embed-text"><img src="'.$idata['og:image:url'].'" class="thumbnail" /><a href="'.$this->getPostedURL().'"><strong>'.$data['og:title'].'</strong></a><br />'.@$data['og:description'].'</span>';
 				break;
 			default:
 				$html = null;

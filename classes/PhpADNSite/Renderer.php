@@ -58,10 +58,11 @@ class Renderer {
 		// Process Links
 		foreach ($meta['entities']['links'] as $entity) {
 			$entityText = mb_substr($post->getText(), $entity['pos'], $entity['len']);
+			$charAfterText = mb_substr($post->getText(), $entity['pos']+$entity['len'], 1); 
 			$embed = $this->dataRetriever->getExternalPageData($entity['url']);
-			if ($embed && $embed['html']) {
+			if ($embed && $embed['html'] && ($charAfterText=='' || $charAfterText==' ' || $charAfterText=="\n")) {
 				// embedded media
-				$html = str_replace($entityText, '<span class="embed">'.$embed['html'].'</span><span class="embed-footer"><a href="'.htmlspecialchars($entity['url']).'">'.$embed['title'].'</a></span>', $html);
+				$html = str_replace($entityText, $embed['html'], $html);
 			} elseif ($embed && $entityText==$entity['url']) {
 				// extend shortened
 				$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'" title="'.htmlspecialchars($embed['url']).'">'.$entityText.'</a>', $html);
