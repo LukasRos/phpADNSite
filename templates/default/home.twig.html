@@ -1,9 +1,0 @@
-{% extends "layout.twig.html" %}
-
-{% block home_menu %}<strong>Home/Recent Posts</strong>{% endblock %}
-
-{% block content %}
-{% for post in posts %}
-{% include 'post.twig.html' with {'post':post} only %}
-{% endfor %}
-{% endblock %}

@@ -1,8 +1,0 @@
-<item>
-<title>{% if post.repost %}Repost from {{post.user.name}}: {% endif %}{{post.text|slice(0,80)}}{% if post.text|length > 80 %} ...{% endif %}</title>
-<description>{% if post.repost %}reposted from &lt;img src=&quot;{{post.user.avatar_image.url}}&quot; /&gt; %lt;a href=&quot;{{post.user.url}}&quot;&gt;{{post.user.name}} (@{{post.user.username}})&lt;/a&gt;: {% endif %}{{post.html|e}}</description>
-<pubDate>{{post.created_at|date('r')}}</pubDate>
-<guid isPermaLink="true">{{site_url}}post/{{post.id}}</guid>
-<link>{{site_url}}post/{{post.id}}</link>
-{% for tag in post.tags %}<category>{{tag}}</category>{% endfor %}
-</item>

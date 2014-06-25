@@ -1,9 +1,0 @@
-{% extends "layout.twig.html" %}
-
-{% block home_menu %}<i class="fa fa-clock-o"></i><strong>My recent posts</strong>{% endblock %}
-
-{% block content %}
-{% for post in posts %}
-{% include 'post.twig.html' with {'post':post} only %}
-{% endfor %}
-{% endblock %}

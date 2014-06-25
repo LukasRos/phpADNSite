@@ -1,9 +1,0 @@
-{% extends "layout.twig.html" %}
-
-{% block conversations_menu %}<strong>My Conversations</strong>{% endblock %}
-
-{% block content %}
-{% for post in posts %}
-{% include 'post.twig.html' with {'post':post} only %}
-{% endfor %}
-{% endblock %}
