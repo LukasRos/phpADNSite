@@ -1,0 +1,34 @@
+<?php
+
+return array(
+	// All domains - one or more - that are served by this PhpADNSite instance
+	'domains' => array(
+			'example.com' => array(
+					// The API backend configuration for this user
+					'backend_config' => array(
+							// The app.net username
+							'username' => 'example',
+							// An access token for the API
+							'access_token' => 'example'
+					),
+					// The theme configuration for this user
+					'theme_config' => array(
+							// Theme name; leave at "bootstrap-default" for the standard theme
+							'name' => 'bootstrap-default',
+							// Optional variables specified by the theme (the standard theme has none)
+							'variables' => array()
+					)
+			)
+	),
+	// Chain of plugin class names; plugins are executed in the order in which they are specified here
+	'plugins' => array(),
+	// The API backend; typically this should NOT be changed unless you want to use an API proxy
+	'backend' => array(
+		'class' => 'PhpADNSite\Core\GuzzleAPIClient',
+		'config' => array(
+			'uri' => 'https://api.app.net/'
+		)
+	),
+	// Debug mode; should always remain false except during (plugin) development
+	'debug' => false
+);

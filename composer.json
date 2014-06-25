@@ -1,0 +1,12 @@
+{
+    "require": {
+        "silex/silex": "1.0.*",
+		"twig/twig": "v1.12.1",
+		"guzzle/http" : "v3.7.4"
+    },
+    "autoload": {
+		"psr-0": {
+			"PhpADNSite" : "classes"
+		}
+	}
+}

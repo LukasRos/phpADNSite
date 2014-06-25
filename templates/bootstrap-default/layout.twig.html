@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% if user %}{{user.name}} (@{{user.username}}){% endif %}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+	<link rel="alternate" type="application/rss+xml" href="{{site_url}}rss" />
+	<link rel="me" href="https://alpha.app.net/{{user.username}}" />
+	<style type="text/css">
+		.adn-avatar-small {
+			height:15px;
+			width:15px;
+		}
+		.h-entry {
+			margin-bottom:50px;
+		}
+		h1 a, h1 a:hover {
+			color:#333;
+		}
+		.head-avatar {
+			height:50px; width:50px; margin:10px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="page-header">
+			{% if user %}
+			<h1><a href="/"><img src="{{user.avatar_image.url}}" class="img-circle head-avatar" />{{user.name}}</a></h1>
+			{% endif %}
+		</div>
+		{% block content %}
+		{% endblock %}
+		<p class="text-center"><small>powered by <a href="https://join.app.net/">app.net</a> and <a href="https://github.com/LukasRos/phpADNSite">phpADNSite</a> &#183; default theme using <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://glyphicons.com/">Glyphicons</a></small></p>
+	</div>
+</body>
+</html>

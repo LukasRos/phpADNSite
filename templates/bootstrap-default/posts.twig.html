@@ -1,0 +1,7 @@
+{% extends "layout.twig.html" %}
+
+{% block content %}
+{% for p in posts %}
+{% include p.template with {'post':p.post, 'meta':p.meta, 'is_permalink':false} only %}
+{% endfor %}
+{% endblock %}
