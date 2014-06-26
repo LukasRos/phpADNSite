@@ -36,4 +36,9 @@ interface APIClient {
 	 */
 	public function retrieveRecentPosts();
 	
+	/**
+	 * Retrieve a single post by its ID.
+	 * @param integer $id The ID of the post.
+	 */
+	public function retrieveSinglePost($id);
 }

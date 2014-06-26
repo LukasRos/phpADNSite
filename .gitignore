@@ -4,3 +4,4 @@ tmp
 .settings
 .project
 config.php
+.vagrant
