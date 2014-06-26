@@ -20,20 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace PhpADNSite\Core;
 
 /**
- * Generic interface for plugins.
+ * Definition of constants for different types of views.
  */
-interface Plugin {
-
-	/**
-	 * Add a post for processing.
-	 * @param Post $post
-	 */
-	public function add(Post $post);
+interface View {
 	
-	/**
-	 * Process all added posts.
-	 * @param $viewType The type of view for which items should be processed.
-	 */
-	public function processAll($viewType);
+	const STREAM = 0;
+	const PERMALINK = 1;
 	
 }

@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace PhpADNSite\Core;
 
 class PostProcessor {
-	
+
 	private $posts = array();
 	private $plugins = array();
 		
@@ -64,7 +64,7 @@ class PostProcessor {
 		return str_replace("\n", '<br />', $html);
 	}
 	
-	public function renderForTemplate() {
+	public function renderForTemplate($viewType) {
 		$output = array();
 		
 		// Call all registered plugins
@@ -72,7 +72,7 @@ class PostProcessor {
 			foreach ($this->posts as $p) {
 				if (!$p->isProcessingStopped()) $plugin->add($p);
 			}
-			$plugin->processAll();
+			$plugin->processAll($viewType);
 		}
 		
 		foreach ($this->posts as $post) {

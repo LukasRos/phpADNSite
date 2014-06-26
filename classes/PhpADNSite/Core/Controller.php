@@ -32,6 +32,7 @@ class Controller implements ControllerProviderInterface {
 	
 	public function generateResponse($template, $postData) {
 		if (!$this->twig) return $postData['message'];
+		
 		return $this->twig->render($template, array(
 			'user' => isset($postData[0]) ? $postData[0]['post']['user'] : null,
 			'posts' => $postData,
@@ -62,13 +63,13 @@ class Controller implements ControllerProviderInterface {
 	public function renderRecentPosts() {
 		$processor = new PostProcessor($this->config['plugins']);
 		foreach ($this->client->retrieveRecentPosts() as $post) $processor->add($post);		
-		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate());
+		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM));
 	}
 	
 	public function renderRecentPostsRSS() {
 		$processor = new PostProcessor($this->config['plugins']);
 		foreach ($this->client->retrieveRecentPosts() as $post) $processor->add($post);
-		return new Response($this->generateResponse('rss.twig.xml', $processor->renderForTemplate()), 200, array('Content-Type' => 'application/rss+xml'));
+		return new Response($this->generateResponse('rss.twig.xml', $processor->renderForTemplate(View::STREAM)), 200, array('Content-Type' => 'application/rss+xml'));
 	}
 	
 	public function renderPermalinkPage($postId) {
@@ -77,7 +78,7 @@ class Controller implements ControllerProviderInterface {
 		if (!$post) throw new FileNotFoundException('/post/'.$postId); 
 		$processor->add($post);
 		if (!$post->isVisible()) throw new FileNotFoundException('/post/'.$postId);
-		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate());
+		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate(View::PERMALINK));
 	}
 	
 	/**

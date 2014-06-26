@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace PhpADNSite\Plugins;
 
-use PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
+use PhpADNSite\Core\View, PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
 
 /**
- * The "ReplyAndDirectedPostHider" hides all posts from the timeline that are replies to existing
+ * The "ReplyAndDirectedPostHider" hides all posts from streams that are replies to existing
  * threads or are directed (@). This is useful to keep a page clean of segments of conversations.
  */
 class ReplyAndDirectedPostHider implements Plugin {
@@ -33,10 +33,12 @@ class ReplyAndDirectedPostHider implements Plugin {
 		$this->posts[] = $post;
 	}
 	
-	public function processAll() {
-		foreach ($this->posts as $post) {
-			$text = $post->get('text');
-			if ($text[0]=='@' || $post->has('reply_to')) $post->setVisible(false);
+	public function processAll($viewType) {
+		if ($viewType!=View::PERMALINK) {
+			foreach ($this->posts as $post) {
+				$text = $post->get('text');
+				if ($text[0]=='@' || $post->has('reply_to')) $post->setVisible(false);
+			}
 		}
 	}
 }
