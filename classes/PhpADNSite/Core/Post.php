@@ -30,6 +30,8 @@ class Post {
 	private $visible = true;
 	private $stopProcessing = false;
 	
+	private $repost = null;
+	
 	public function __construct(array $payload) {
 		foreach ($payload as $key => $value) {
 			switch ($key) {
@@ -138,5 +140,63 @@ class Post {
 	public function stopProcessing() {
 		$this->stopProcessing = true;
 		return $this;
-	}	
+	}
+	
+	/**
+	 * Checks whether this post has at least one annotation with the given type.
+	 * @param string $annotationType The annotation type, typically a reverse-hostname string
+	 */
+	public function hasAnnotation($annotationType) {
+		if (isset($this->payload['annotations'])) {
+			foreach ($this->payload['annotations'] as $annotation) {
+				if ($annotation['type']==$annotationType) return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns the value of the first annotation with the given type.
+	 * @param string $annotationType The annotation type, typically a reverse-hostname string
+	 */
+	public function getAnnotationValue($annotationType) {
+		if (isset($this->payload['annotations'])) {
+			foreach ($this->payload['annotations'] as $annotation) {
+				if ($annotation['type']==$annotationType) return $annotation['value'];
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the values of all annotations with the given type.
+	 * @param string $annotationType The annotation type, typically a reverse-hostname string
+	 */
+	public function getAnnotationValues($annotationType) {
+		$annotations = array();
+		if (isset($this->payload['annotations'])) {
+			foreach ($this->payload['annotations'] as $annotation) {
+				if ($annotation['type']==$annotationType) $annotations[] = $annotation['value'];
+			}
+		}
+		return $annotations;
+	}
+	
+	/**
+	 * Indicates whether this post is a repost of another post.
+	 */
+	public function isRepost() {
+		return isset($this->payload['repost_of']);
+	}
+	
+	/**
+	 * If this post is a repost, returns the original post as a post object. Note that currently
+	 * this is a copy as changes to the repost object will not affect template rendering. 
+	 */
+	public function getOriginalPost() {
+		if (!$this->isRepost()) return null;
+		
+		if (!$this->repost) $this->repost = new Post($this->payload['repost_of']);
+		return $this->repost;
+	}
 }
