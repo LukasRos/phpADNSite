@@ -26,6 +26,17 @@ class GuzzleAPIClient implements APIClient {
 	private $client;
 	private $username;
 		
+	private $userId = null;
+	
+	private function getIdFromUsername() {
+		if (!$this->userId) {
+			$userRequest = $this->client->get('users/@'.$this->username);
+			$userResponse = $userRequest->send()->json();
+			$this->userId = $userResponse['data']['id'];
+		}
+		return $this->userId;	
+	}
+	
 	public function configure(array $globalConfiguration, array $userConfiguration) {
 		$this->client = new Client($globalConfiguration['uri']);
 		$this->username = $userConfiguration['username'];
@@ -47,4 +58,13 @@ class GuzzleAPIClient implements APIClient {
 		if ($response['data']['user']['username']!=$this->username) $post->setVisible(false);
 		return $post;
 	}
+	
+	public function retrievePostsWithHashtag($tag) {
+		$request = $this->client->get('posts/search?creator_id='.$this->getIdFromUsername().'&hashtags='.$tag.'&include_deleted=0&include_directed=0&include_annotations=1&include_html=0');
+		$response = $request->send()->json();
+		$posts = array();
+		foreach ($response['data'] as $p) $posts[] = new Post($p);
+		return $posts;		
+	}
+	
 }

@@ -32,7 +32,7 @@ interface APIClient {
 	public function configure(array $globalConfiguration, array $userConfiguration);
 
 	/**
-	 * Retrieve the recent posts for the user.
+	 * Retrieve the recent posts from the user.
 	 */
 	public function retrieveRecentPosts();
 	
@@ -41,4 +41,10 @@ interface APIClient {
 	 * @param integer $id The ID of the post.
 	 */
 	public function retrieveSinglePost($id);
+	
+	/**
+	 * Retrieve posts from the user with a specific #hashtag.
+	 */
+	public function retrievePostsWithHashtag($tag);
+
 }

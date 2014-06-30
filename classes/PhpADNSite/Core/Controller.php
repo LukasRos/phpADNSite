@@ -81,6 +81,13 @@ class Controller implements ControllerProviderInterface {
 		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate(View::PERMALINK));
 	}
 	
+	public function renderPostsWithHashtag($tag) {
+		$processor = new PostProcessor($this->config['plugins']);
+		foreach ($this->client->retrievePostsWithHashtag($tag) as $post) $processor->add($post);
+		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM));
+	}
+	
+	
 	/**
 	 * Initialize the PhpADNSite controller
 	 * @param array $config The instance configuration
@@ -121,6 +128,11 @@ class Controller implements ControllerProviderInterface {
 			return $controller->renderPermalinkPage($postId);
 		});
 	
+		$controllers->get('/tagged/{tag}', function($tag) use ($controller) {
+			// Render posts with a specific hashtag
+			return $controller->renderPostsWithHashtag($tag);
+		});
+		
 		return $controllers;
 	}
 	

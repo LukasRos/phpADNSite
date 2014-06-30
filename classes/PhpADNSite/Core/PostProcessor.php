@@ -42,7 +42,7 @@ class PostProcessor {
 		// Process Hashtags
 		foreach ($payload['entities']['hashtags'] as $entity) {
 			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
-			$html = preg_replace('/'.$entityText.'\b/', '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" rel="tag" href="https://alpha.app.net/hashtags/'.$entity['name'].'">'.$entityText.'</a>', $html);
+			$html = preg_replace('/'.$entityText.'\b/', '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" rel="tag" href="/tagged/'.$entity['name'].'">'.$entityText.'</a>', $html);
 			$tags[] = $entity['name'];
 		}
 			
