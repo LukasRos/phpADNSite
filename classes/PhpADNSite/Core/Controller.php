@@ -30,15 +30,15 @@ class Controller implements ControllerProviderInterface {
 	private $config;
 	private $domain;
 	
-	public function generateResponse($template, $postData) {
+	public function generateResponse($template, $postData, $customPageVars = array()) {
 		if (!$this->twig) return $postData['message'];
 		
-		return $this->twig->render($template, array(
+		return $this->twig->render($template, array_merge(array(
 			'user' => isset($postData[0]) ? $postData[0]['post']['user'] : null,
 			'posts' => $postData,
 			'site_url' => 'http://'.$this->domain.'/',
 			'vars' => $this->config['domains'][$this->domain]['theme_config']['variables']
-		));
+		), $customPageVars));
 	}
 	
 	public function initializeWithDomain($domain) {
@@ -84,7 +84,7 @@ class Controller implements ControllerProviderInterface {
 	public function renderPostsWithHashtag($tag) {
 		$processor = new PostProcessor($this->config['plugins']);
 		foreach ($this->client->retrievePostsWithHashtag($tag) as $post) $processor->add($post);
-		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM));
+		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
 	}
 	
 	

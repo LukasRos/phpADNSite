@@ -1,0 +1,10 @@
+{% extends "layout.twig.html" %}
+
+{% block content %}
+<div>
+	<h2 class="text-center">#{{tag}}</h2>
+</div>
+{% for p in posts %}
+{% include p.template with {'post':p.post, 'meta':p.meta, 'is_permalink':false} only %}
+{% endfor %}
+{% endblock %}
