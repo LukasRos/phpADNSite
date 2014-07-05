@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace PhpADNSite\Core;
 
 use Silex\Application, Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\Request, Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request, Symfony\Component\HttpFoundation\Response, Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class Controller implements ControllerProviderInterface {
@@ -82,6 +82,11 @@ class Controller implements ControllerProviderInterface {
 	}
 	
 	public function renderPostsWithHashtag($tag) {
+		if ($tag!=strtolower($tag)) {
+			// for upper- or camelcase hashtags redirect to the lowercase version
+			return new RedirectResponse('/tagged/'.strtolower($tag));
+		}
+		
 		$processor = new PostProcessor($this->config['plugins']);
 		foreach ($this->client->retrievePostsWithHashtag($tag) as $post) $processor->add($post);
 		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
