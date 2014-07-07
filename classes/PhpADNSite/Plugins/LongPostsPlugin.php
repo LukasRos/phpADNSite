@@ -48,7 +48,7 @@ class LongPostsPlugin implements Plugin {
 				
 				$bodyLines = explode("\n", $annotation['body']);
 				$body = '';
-				foreach ($bodyLines as $l) $body .= '<p>'.$l.'</p>'; 
+				foreach ($bodyLines as $l) if (trim($l)!='') $body .= '<p>'.$l.'</p>';
 				$post->setMetaField('longpost_htmlbody', $body);
 				
 				// Do not handle other annotations
