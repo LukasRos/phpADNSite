@@ -1,10 +1,4 @@
 <article class="h-entry">
 	<h2 class="p-name">{{meta.longpost_title}}</h2>
 	<div class="e-content">{{meta.longpost_htmlbody}}</div>
-	<p class="text-right">
-		{% if post.num_stars > 0 %}{{post.num_stars}} <span class="glyphicon glyphicon-star"></span> &#183;{% endif %}
-		{% if post.num_replies > 0 %}{{post.num_replies}} <span class="glyphicon glyphicon-comment"></span> &#183;{% endif %}
-		{% if post.num_reposts > 0 %}{{post.num_reposts}} <span class="glyphicon glyphicon-retweet"></span> &#183;{% endif %}
-		<time class="dt-published" datetime="{{post.created_at|date('Y-m-d H:i')}}2013-06-13 12:00:00">{{post.created_at|date('Y/m/d H:i')}}</time> &#183;{%if is_permalink %} via <a href="{{post.source.link}}">{{post.source.name}}</a> &#183;{%endif%} <a href="/post/{{post.id}}" class="u-url">Permalink</a>
-	</p>
 </article>

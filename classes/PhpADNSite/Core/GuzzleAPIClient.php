@@ -52,7 +52,7 @@ class GuzzleAPIClient implements APIClient {
 	}
 	
 	public function retrieveSinglePost($id) {
-		$request = $this->client->get('posts/'.$id.'?include_annotations=1&include_html=0');
+		$request = $this->client->get('posts/'.$id.'?include_annotations=1&include_html=0&include_starred_by=1&include_reposters=1');
 		$response = $request->send()->json();
 		$post = new Post($response['data']);
 		if ($response['data']['user']['username']!=$this->username) $post->setVisible(false);
