@@ -12,4 +12,11 @@
 	</p>
 </article>
 {% endfor %}
+
+{% if pagination.older or pagination.newer %}
+ <ul class="pager">
+  {% if pagination.older %}<li class="previous"><a href="/posts/before/{{pagination.older}}">&larr; Older</a></li>{% endif %}
+  {% if pagination.newer %}<li class="next"><a href="/posts/after/{{pagination.newer}}">Newer &rarr;</a></li>{% endif %}
+</ul>
+{% endif %}
 {% endblock %}

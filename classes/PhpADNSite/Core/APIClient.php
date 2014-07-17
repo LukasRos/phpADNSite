@@ -46,5 +46,15 @@ interface APIClient {
 	 * Retrieve posts from the user with a specific #hashtag.
 	 */
 	public function retrievePostsWithHashtag($tag);
+	
+	/**
+	 * Retrieve posts older than a specific post ID.
+	 */
+	public function retrievePostsOlderThan($id, $count);
+	
+	/**
+	 * Retrieve posts newer than a specific post ID.
+	 */
+	public function retrievePostsNewerThan($id, $count);
 
 }

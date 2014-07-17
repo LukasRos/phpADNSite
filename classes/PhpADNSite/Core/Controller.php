@@ -62,8 +62,37 @@ class Controller implements ControllerProviderInterface {
 	
 	public function renderRecentPosts() {
 		$processor = new PostProcessor($this->config['plugins']);
-		foreach ($this->client->retrieveRecentPosts() as $post) $processor->add($post);		
-		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM));
+		$page = $this->client->retrieveRecentPosts();
+		foreach ($page as $post) $processor->add($post);
+		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM), array(
+			'pagination' => array(
+				'older' => ($page->hasMore()) ? $page->getMinID() : null
+			)
+		));
+	}
+	
+	public function renderPostsBefore($id) {
+		$processor = new PostProcessor($this->config['plugins']);
+		$page = $this->client->retrievePostsOlderThan($id);
+		foreach ($page as $post) $processor->add($post);
+		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM), array(
+				'pagination' => array(
+					'older' => ($page->hasMore()) ? $page->getMinID() : null,
+					'newer' => $page->getMaxID()
+				)
+		));		
+	}
+	
+	public function renderPostsAfter($id) {
+		$processor = new PostProcessor($this->config['plugins']);
+		$page = $this->client->retrievePostsNewerThan($id);
+		foreach ($page as $post) $processor->add($post);
+		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM), array(
+				'pagination' => array(
+						'older' => $page->getMinID(),
+						'newer' =>  ($page->hasMore()) ? $page->getMaxID() : null
+				)
+		));
 	}
 	
 	public function renderRecentPostsRSS() {
@@ -115,7 +144,7 @@ class Controller implements ControllerProviderInterface {
 		});
 		
 		$app->error(function(\Exception $e, $code) use ($app, $controller) {
-			return new Response($controller->generateResponse('404.twig.html', array('message' => $e->getMessage()), $code));
+			return new Response($controller->generateResponse('404.twig.html', array('message' => $e->getMessage())), $code);
 		});
 	
 		$controllers->get('/', function() use ($controller) {
@@ -136,6 +165,16 @@ class Controller implements ControllerProviderInterface {
 		$controllers->get('/tagged/{tag}', function($tag) use ($controller) {
 			// Render posts with a specific hashtag
 			return $controller->renderPostsWithHashtag($tag);
+		});
+		
+		$controllers->get('/posts/before/{id}', function($id) use ($controller) {
+			// Render posts before ID
+			return $controller->renderPostsBefore($id);
+		});
+		
+		$controllers->get('/posts/after/{id}', function($id) use ($controller) {
+			// Render posts after ID
+			return $controller->renderPostsAfter($id);
 		});
 		
 		return $controllers;

@@ -23,11 +23,13 @@ use Guzzle\Http\Client;
 
 class GuzzleAPIClient implements APIClient {
 
+	const DEFAULT_STREAM_FETCH_VARS = 'include_deleted=0&include_directed=0&include_annotations=1&include_html=0';
+	
 	private $client;
 	private $username;
 		
 	private $userId = null;
-	
+		
 	private function getIdFromUsername() {
 		if (!$this->userId) {
 			$userRequest = $this->client->get('users/@'.$this->username);
@@ -43,12 +45,10 @@ class GuzzleAPIClient implements APIClient {
 		$this->client->setDefaultHeaders(array('Authorization' => 'Bearer '.$userConfiguration['access_token']));
 	}
 	
-	public function retrieveRecentPosts() {
-		$request = $this->client->get('users/@'.$this->username.'/posts?include_deleted=0&include_directed=0&include_annotations=1&include_html=0');
-		$response = $request->send()->json();
-		$posts = array();
-		foreach ($response['data'] as $p) $posts[] = new Post($p);
-		return $posts;
+	public function retrieveRecentPosts($count = 20) {
+		return new PostPage($this->client
+				->get('users/@'.$this->username.'/posts?count='.$count.'&'.self::DEFAULT_STREAM_FETCH_VARS)
+				->send()->json());
 	}
 	
 	public function retrieveSinglePost($id) {
@@ -65,6 +65,18 @@ class GuzzleAPIClient implements APIClient {
 		$posts = array();
 		foreach ($response['data'] as $p) $posts[] = new Post($p);
 		return $posts;		
+	}
+	
+	public function retrievePostsOlderThan($id, $count = 20) {
+		return new PostPage($this->client
+				->get('users/@'.$this->username.'/posts?before_id='.$id.'&count='.$count.'&'.self::DEFAULT_STREAM_FETCH_VARS)
+				->send()->json());
+			}
+	
+	public function retrievePostsNewerThan($id, $count = 20) {
+		return new PostPage($this->client
+				->get('users/@'.$this->username.'/posts?since_id='.$id.'&count=-'.$count.'&'.self::DEFAULT_STREAM_FETCH_VARS)
+				->send()->json());
 	}
 	
 }
