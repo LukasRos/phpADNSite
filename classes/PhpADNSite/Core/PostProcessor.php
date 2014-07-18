@@ -36,7 +36,7 @@ class PostProcessor {
 	}
 	
 	private function generateDefaultHTML($payload) {
-		$html = $payload['text'];
+		$html = htmlentities($payload['text']);
 		$tags = array();
 			
 		// Process Hashtags
