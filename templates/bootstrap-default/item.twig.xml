@@ -1,5 +1,5 @@
 <item>
-	<title>{{post.text|e|slice(0,80)}}{% if post.text|length > 80 %} ...{% endif %}</title>
+	<title>{{meta.title|e}}</title>
 	<description>{{post.html|e}}</description>
 	<pubDate>{{post.created_at|date('r')}}</pubDate>
 	<guid isPermaLink="true">{{site_url}}post/{{post.id}}</guid>

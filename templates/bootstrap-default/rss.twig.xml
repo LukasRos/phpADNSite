@@ -10,7 +10,7 @@
 		<url>{{user.avatar_image.url}}</url>
 	</image>
 	{% for post in posts %}
-	{% include 'item.twig.xml' with {'post':post.post, 'site_url':site_url} only %}
+	{% include 'item.twig.xml' with {'post':post.post, 'meta':post.meta, 'site_url':site_url} only %}
 	{% endfor %}
 </channel>
 </rss>

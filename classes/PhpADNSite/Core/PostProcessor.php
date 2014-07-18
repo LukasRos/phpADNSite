@@ -64,6 +64,15 @@ class PostProcessor {
 		return str_replace("\n", '<br />', $html);
 	}
 	
+	private function truncate($text, $length) {
+		// truncate a string only at a whitespace (by nogdog)
+		// taken (modified) from: http://stackoverflow.com/a/972031
+   		if (strlen($text) > $length) {
+      		$text = preg_replace("/^(.{1,$length})(\s.*|$)/s", '\\1 ...', $text);
+   		}
+   		return $text;
+	}
+	
 	public function renderForTemplate($viewType) {
 		$output = array();
 		
@@ -84,6 +93,14 @@ class PostProcessor {
 			}
 			if (isset($payload['repost_of']) && !isset($payload['repost_of']['html'])) {
 				$payload['repost_of']['html'] = $this->generateDefaultHTML($payload['repost_of']);
+			}
+			
+			if (!$post->hasMetaField('title')) {
+				// Generate a title for listings, e.g. in an RSS feed
+				if (isset($payload['entities']['links']) && count($payload['entities']['links'])>0
+						&& $payload['entities']['links'][0]['pos']<80)
+					$post->setMetaField('title', substr($payload['text'], 0, $payload['entities']['links'][0]['pos']-1));
+				else $post->setMetaField('title', $this->truncate($payload['text'], 80));
 			}
 			
 			$output[] = array(
