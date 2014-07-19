@@ -4,30 +4,9 @@
 	<title>{% if user %}{{user.name}} (@{{user.username}}){% endif %}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="/templates/bootstrap-default/css/style.css" />
 	<link rel="alternate" type="application/rss+xml" href="{{site_url}}rss" />
 	<link rel="me" href="https://alpha.app.net/{{user.username}}" />
-	<style type="text/css">
-		.adn-avatar-small {
-			height:15px;
-			width:15px;
-		}
-		.adn-avatar-medium {
-			height:35px;
-			width:35px;
-		}
-		.h-entry {
-			margin-bottom:50px;
-		}
-		h1 a, h1 a:hover {
-			color:#333;
-		}
-		.head-avatar {
-			height:50px; width:50px; margin:10px;
-		}
-		.panel-body span, .panel-body img {
-			margin:0 5px;
-		}
-	</style>
 </head>
 <body>
 	<div class="container">

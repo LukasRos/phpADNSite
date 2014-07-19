@@ -1,0 +1,27 @@
+.adn-avatar-small {
+	height: 15px;
+	width: 15px;
+}
+
+.adn-avatar-medium {
+	height: 35px;
+	width: 35px;
+}
+
+.h-entry {
+	margin-bottom: 50px;
+}
+
+h1 a,h1 a:hover {
+	color: #333;
+}
+
+.head-avatar {
+	height: 50px;
+	width: 50px;
+	margin: 10px;
+}
+
+.panel-body span,.panel-body img {
+	margin: 0 5px;
+}
