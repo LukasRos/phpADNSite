@@ -62,6 +62,6 @@ class PostPage implements \Iterator {
 	}
 	
 	public function hasMore() {
-		return $this->meta['more'];
+		return isset($this->meta['more']) && $this->meta['more'];
 	}
 }
