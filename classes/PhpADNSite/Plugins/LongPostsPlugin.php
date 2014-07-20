@@ -28,7 +28,8 @@ use PhpADNSite\Core\View, PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
  */
 class LongPostsPlugin implements Plugin {
 	
-	const ANNOTATION_TYPE = 'net.jazzychad.adnblog.post';
+	const ANNOTATION_TYPE = 'net.jazzychad.adnblog.post';	
+	const TRUNCATED_PARAGRAPH_COUNT = 2;
 	
 	private $posts = array();
 	
@@ -44,12 +45,27 @@ class LongPostsPlugin implements Plugin {
 				
 				// Convert longpost annotation to HTML and move to meta for access from the template 
 				$annotation = $post->getAnnotationValue(self::ANNOTATION_TYPE);
-				$post->setMetaField('longpost_title', $annotation['title']);
+				$post->setMetaField('title', $annotation['title']);
+				$post->setMetaField('truncated', false);
 				
 				$bodyLines = explode("\n", $annotation['body']);
 				$body = '';
-				foreach ($bodyLines as $l) if (trim($l)!='') $body .= '<p>'.$l.'</p>';
-				$post->setMetaField('longpost_htmlbody', $body);
+				if ($viewType==View::PERMALINK) {
+					foreach ($bodyLines as $l) if (trim($l)!='') $body .= '<p>'.$l.'</p>';					
+				} else {
+					$i = 0;
+					foreach ($bodyLines as $l) {
+						if (trim($l)!='') {
+							$body .= '<p>'.$l.'</p>';
+							$i++;
+							if ($i>=self::TRUNCATED_PARAGRAPH_COUNT) {
+								$post->setMetaField('truncated', true);
+								break;
+							}
+						}
+					}
+				}
+				$post->set('html', $body);
 				
 				// Do not handle other annotations
 				$post->stopProcessing();

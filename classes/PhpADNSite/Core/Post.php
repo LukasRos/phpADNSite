@@ -65,10 +65,19 @@ class Post {
 	}
 	
 	/**
+	 * Update a single field in the post payload.
+	 */
+	public function set($key, $value) {
+		$this->payload[$key] = $value;
+		return $this;
+	}
+	
+	/**
 	 * Set the payload of the post. Plugins can use this method to modify the content.
 	 */
 	public function setPayload($payload) {
 		$this->payload = $payload;
+		return $this;
 	}
 	
 	/**
@@ -90,6 +99,7 @@ class Post {
 	 */
 	public function setMetaField($key, $value) {
 		$this->meta[$key] = $value;
+		return $this;
 	}
 	
 	/**
@@ -111,6 +121,7 @@ class Post {
 	 */
 	public function setTemplate($template) {
 		$this->template = $template;
+		return $this;
 	}
 	
 	/**
@@ -125,6 +136,7 @@ class Post {
 	 */
 	public function setVisible($visible) {
 		$this->visible = $visible;
+		return $this;
 	}
 	
 	/**
