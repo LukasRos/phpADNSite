@@ -1,5 +1,13 @@
 {
-    "require": {
+	"name": "lukasros/phpadnsite",
+	"type": "library",
+	"keywords": ["app.net", "social", "indieweb"],
+	"description": "Personal website to display app.net posts.",
+	"homepage": "https://github.com/LukasRos/phpADNSite",
+	"license": "AGPL",
+	"authors": [{ "name": "Lukas Rosenstock", "homepage" : "http://lukasrosenstock.net/" }],
+	"require": {
+		"php": ">=5.3.0",
         "silex/silex": "1.0.*",
 		"twig/twig": "v1.12.1",
 		"guzzle/http" : "v3.7.4"
