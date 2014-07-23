@@ -12,11 +12,12 @@ A "federation" system is planned in which mentions, reposts, stars or replies be
 To run phpADNSite you need a webserver with PHP 5.3 or higher installed (including curl and multibyte support) and capable of URL rewriting. A database is *not* required unless you use plugins that require persistence (currently none).
  
 ## Getting it set up
-1. If you're reading this online, download an archive of the source code or clone/check out the repository.
-2. Get a personal access token with the *streams* permission. You can [create your own app on app.net](https://account.app.net/developer/apps/) and generate a token or you can use [dev-lite](http://dev-lite.jonathonduerig.com) for this.
-3. Copy `config.php.template`to `config.php`and edit `config.php`. Replace *example.com* in the domains array with the domain you want to use and enter your username (without @) into the *username* field and the access token you generated in the previous step into the *access_token* field.
-4. Upload the source code to any webserver. If you use an older version of Apache you may have to replace `.htaccess`with `.htaccess.alt`and if you use a different webserver you have to configure URL rewriting manually.
-5. Open the URL to your webserver in your browser. You should see your latest posts. Congratulations!
+1. Create a directory in which you want to install phpADNSite and change to that directory in a terminal.
+2. Run the following command to download phpADNSite and its dependencies: `composer create-project "lukasros/phpadnsite" . dev-master`
+3. Get a personal access token with the *streams* permission. You can [create your own app on app.net](https://account.app.net/developer/apps/) and generate a token or you can use [dev-lite](http://dev-lite.jonathonduerig.com) for this.
+4. Copy `config.php.template`to `config.php` and edit `config.php`. Replace *example.com* in the domains array with the domain you want to use and enter your username (without @) into the *username* field and the access token you generated in the previous step into the *access_token* field.
+5. Upload the source code to any webserver. If you use an older version of Apache you may have to replace `.htaccess` with `.htaccess.alt` and if you use a different webserver you have to configure URL rewriting manually.
+6. Open the URL to your webserver in your browser. You should see your latest posts. Congratulations!
 
 ## Implementation Details
 The implementation is basically a thin layer between the app.net API and templates written in Twig together with a plugin system of PHP classes that allows pre-processing of posts, e.g. using annotations. It's based on the Silex framework. All content is served from the app.net API, there is no database of other persistence layer. You can run one instance for multiple users by mapping different (sub)domains.

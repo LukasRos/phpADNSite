@@ -1,6 +1,6 @@
 {
 	"name": "lukasros/phpadnsite",
-	"type": "library",
+	"type": "project",
 	"keywords": ["app.net", "social", "indieweb"],
 	"description": "Personal website to display app.net posts.",
 	"homepage": "https://github.com/LukasRos/phpADNSite",
