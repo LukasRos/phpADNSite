@@ -211,4 +211,16 @@ class Post {
 		if (!$this->repost) $this->repost = new Post($this->payload['repost_of']);
 		return $this->repost;
 	}
+	
+	/**
+	 * Returns a filtered amount of payload fields required for rendering a post. 
+	 */
+	public function getPayloadForTemplate() {
+		$fields = array('id', 'created_at', 'text', 'html', 'repost_of', 'num_stars', 'num_reposts', 'num_replies', 'source');
+		$output = array();
+		foreach ($fields as $f) {
+			if (isset($this->payload[$f])) $output[$f] = $this->payload[$f];
+		}
+		return $output;
+	}
 }

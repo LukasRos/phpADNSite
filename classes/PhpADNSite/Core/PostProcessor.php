@@ -35,35 +35,6 @@ class PostProcessor {
 		$this->posts[] = $post;
 	}
 	
-	private function generateDefaultHTML($payload) {
-		$html = htmlentities($payload['text']);
-		$tags = array();
-			
-		// Process Hashtags
-		foreach ($payload['entities']['hashtags'] as $entity) {
-			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
-			$html = preg_replace('/'.$entityText.'\b/', '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" rel="tag" href="/tagged/'.$entity['name'].'">'.$entityText.'</a>', $html);
-			$tags[] = $entity['name'];
-		}
-			
-		// Process Links
-		foreach ($payload['entities']['links'] as $entity) {
-			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
-			$charAfterText = mb_substr($payload['text'], $entity['pos']+$entity['len'], 1);
-			$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>', $html);
-		}
-			
-		// Process User Mentions
-		foreach ($payload['entities']['mentions'] as $entity) {
-			//$userUrl = isset($entity['x_user_url']) ? $entity['x_user_url'] : '/redirectToUser/'.$entity['name'];
-			$userUrl = 'https://alpha.app.net/'.$entity['name'];
-			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
-			$html = preg_replace('/'.$entityText.'\b/', '<a href="'.$userUrl.'">'.$entityText.'</a>', $html);
-		}
-			
-		return str_replace("\n", '<br />', $html);
-	}
-	
 	private function truncate($text, $length) {
 		// truncate a string only at a whitespace (by nogdog)
 		// taken (modified) from: http://stackoverflow.com/a/972031
@@ -84,15 +55,24 @@ class PostProcessor {
 			$plugin->processAll($viewType);
 		}
 		
+		$user = null;
+		
 		foreach ($this->posts as $post) {
+			if (!$user) {
+				$user = $post->get('user');
+				$user['description']['html'] = EntityProcessor::generateDefaultHTML($user['description']);
+			}
 			if (!$post->isVisible()) continue;
 			
 			$payload = $post->getPayload();
 			if (!isset($payload['html'])) {
-				$payload['html'] = $this->generateDefaultHTML($payload);
+				$post->set('html', EntityProcessor::generateDefaultHTML($payload));
 			}
 			if (isset($payload['repost_of']) && !isset($payload['repost_of']['html'])) {
-				$payload['repost_of']['html'] = $this->generateDefaultHTML($payload['repost_of']);
+				$post->set('repost_of', array_merge(
+					$payload['repost_of'],
+					array('html' => EntityProcessor::generateDefaultHTML($payload['repost_of']))
+				));
 			}
 			
 			if (!$post->hasMetaField('title')) {
@@ -105,11 +85,12 @@ class PostProcessor {
 			
 			$output[] = array(
 				'template' => $post->getTemplate(),
-				'post' => $payload,
+				'post' => $post->getPayloadForTemplate(),
 				'meta' => $post->getAllMetaFields()	
 			);
 		}
-		return $output;
+		
+		return array('user' => $user, 'posts' => $output);
 	}
 	
 }

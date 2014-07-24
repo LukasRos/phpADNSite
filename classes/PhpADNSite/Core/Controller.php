@@ -33,9 +33,7 @@ class Controller implements ControllerProviderInterface {
 	public function generateResponse($template, $postData, $customPageVars = array()) {
 		if (!$this->twig) return $postData['message'];
 		
-		return $this->twig->render($template, array_merge(array(
-			'user' => isset($postData[0]) ? $postData[0]['post']['user'] : null,
-			'posts' => $postData,
+		return $this->twig->render($template, array_merge($postData, array(
 			'site_url' => 'http://'.$this->domain.'/',
 			'vars' => $this->config['domains'][$this->domain]['theme_config']['variables']
 		), $customPageVars));
