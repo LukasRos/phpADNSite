@@ -1,0 +1,5 @@
+<article class="h-entry">
+	<h2 class="p-name">{{meta.title}}</h2>
+	<div class="e-content">{{post.html}}</div>
+	{% if meta.truncated %}<div><a href="/post/{{post.id}}">Read more</a></div>{% endif %}
+</article>

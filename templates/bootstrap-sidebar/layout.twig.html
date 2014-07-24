@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% if user %}{{user.name}} (@{{user.username}}){% endif %}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="/templates/bootstrap-sidebar/css/style.css" />
+	<link rel="alternate" type="application/rss+xml" href="{{site_url}}rss" />
+	<link rel="me" href="https://alpha.app.net/{{user.username}}" />
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			{% if user %}
+			<div class="col-md-4">
+				<h1><a href="/"><img src="{{user.avatar_image.url}}" class="img-circle head-avatar" /><br />{{user.name}}</a></h1>
+				<p class="text-center">{{user.description.html}}</p>
+			</div>
+			{% endif %}
+			<div class="col-md-8">
+				{% block content %}
+				{% endblock %}
+			</div>
+		</div>
+		<p class="text-center"><small>powered by <a href="https://join.app.net/">app.net</a> and <a href="https://github.com/LukasRos/phpADNSite">phpADNSite</a> &#183; default theme using <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://glyphicons.com/">Glyphicons</a></small></p>
+	</div>
+</body>
+</html>
