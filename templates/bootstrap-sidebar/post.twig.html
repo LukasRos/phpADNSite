@@ -1,5 +1,5 @@
 {% if post.repost_of %}
-	<p><img src="{{post.repost_of.user.avatar_image.url}}" class="adn-avatar-small img-circle"/> <a href="https://alpha.app.net/{{post.repost_of.user.username}}">{{post.repost_of.user.name}} (@{{post.repost_of.user.username}})</a>:</p>
+	<p><img src="{{post.repost_of.user.avatar_image.url}}" class="adn-avatar-small img-circle"/> <a href="{{post.repost_of.user.canonical_url}}">{{post.repost_of.user.name}} (@{{post.repost_of.user.username}})</a>:</p>
 	<blockquote>{{post.repost_of.html}}{% if meta.img %}<br /><img src="{{meta.img}}" class="img-responsive" />{% endif %}</blockquote>
 {% else %}
 	<p class="lead e-content">{{post.html}}{% if meta.img %}<br /><img src="{{meta.img}}" class="img-responsive" />{% endif %}</p>

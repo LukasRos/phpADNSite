@@ -44,6 +44,13 @@ class PostProcessor {
    		return $text;
 	}
 	
+	private function processUserAnnotations(User $user) {
+		if ($user->hasAnnotation('net.lukasrosenstock.federatedprofile')) {
+			$value = $user->getAnnotationValue('net.lukasrosenstock.federatedprofile');
+			$user->set('canonical_url', $value['profile_url']);
+		}
+	}
+	
 	public function renderForTemplate($viewType) {
 		$output = array();
 		
@@ -60,7 +67,10 @@ class PostProcessor {
 		foreach ($this->posts as $post) {
 			if (!$user) {
 				$user = $post->get('user');
-				$user['description']['html'] = EntityProcessor::generateDefaultHTML($user['description']);
+				$user->set('description', array_merge(
+					$user->get('description'),
+					array('html' => EntityProcessor::generateDefaultHTML($user->get('description')))
+				));
 			}
 			if (!$post->isVisible()) continue;
 			
@@ -68,11 +78,13 @@ class PostProcessor {
 			if (!isset($payload['html'])) {
 				$post->set('html', EntityProcessor::generateDefaultHTML($payload));
 			}
-			if (isset($payload['repost_of']) && !isset($payload['repost_of']['html'])) {
-				$post->set('repost_of', array_merge(
-					$payload['repost_of'],
-					array('html' => EntityProcessor::generateDefaultHTML($payload['repost_of']))
-				));
+			if ($post->isRepost()) {
+				// Process repost
+				$originalPost = $post->getOriginalPost();
+				$this->processUserAnnotations($originalPost->get('user'));
+				if (!$originalPost->has('html')) {
+					$originalPost->set('html', EntityProcessor::generateDefaultHTML($originalPost->getPayload()));
+				}
 			}
 			
 			if (!$post->hasMetaField('title')) {
@@ -83,6 +95,14 @@ class PostProcessor {
 				else $post->setMetaField('title', $this->truncate($payload['text'], 80));
 			}
 			
+			// Convert canonical URL for reposters and stargazers
+			if ($post->has('starred_by')) {
+				foreach ($post->get('starred_by') as $u) $this->processUserAnnotations($u);
+			}
+			if ($post->has('reposters')) {
+				foreach ($post->get('reposters') as $u) $this->processUserAnnotations($u);
+			}
+			
 			$output[] = array(
 				'template' => $post->getTemplate(),
 				'post' => $post->getPayloadForTemplate(),
@@ -90,7 +110,7 @@ class PostProcessor {
 			);
 		}
 		
-		return array('user' => $user, 'posts' => $output);
+		return array('user' => $user->getPayloadForTemplate(), 'posts' => $output);
 	}
 	
 }
