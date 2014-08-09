@@ -31,8 +31,6 @@ class Controller implements ControllerProviderInterface {
 	private $domain;
 	
 	public function generateResponse($template, $postData, $customPageVars = array()) {
-		if (!$this->twig) return $postData['message'];
-		
 		return $this->twig->render($template, array_merge($postData, array(
 			'site_url' => 'http://'.$this->domain.'/',
 			'vars' => $this->config['domains'][$this->domain]['theme_config']['variables']
@@ -119,6 +117,12 @@ class Controller implements ControllerProviderInterface {
 		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
 	}
 	
+	public function renderError(\Exception $e, $code) {
+		if ($this->config['debug']==true)
+			return new Response($e->getMessage(), $code, array('Content-Type' => 'text/plain'));
+		else
+			return new Response($this->generateResponse('404.twig.html', array()), $code);
+	}
 	
 	/**
 	 * Initialize the PhpADNSite controller
@@ -142,7 +146,7 @@ class Controller implements ControllerProviderInterface {
 		});
 		
 		$app->error(function(\Exception $e, $code) use ($app, $controller) {
-			return new Response($controller->generateResponse('404.twig.html', array('message' => $e->getMessage())), $code);
+			return $controller->renderError($e, $code);
 		});
 	
 		$controllers->get('/', function() use ($controller) {
