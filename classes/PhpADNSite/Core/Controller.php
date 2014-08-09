@@ -124,6 +124,33 @@ class Controller implements ControllerProviderInterface {
 			return new Response($this->generateResponse('404.twig.html', array()), $code);
 	}
 	
+	public function setupFederation() {
+		$user = $this->client->retrieveUser();		
+		if ($user->hasAnnotation('net.lukasrosenstock.federatedprofile')
+				&& ($value = $user->getAnnotationValue('net.lukasrosenstock.federatedprofile'))
+				&& $value['profile_url']=='http://'.$this->domain.'/') {
+			$message = 'The domain <'.$this->domain.'> is already configured for app.net federation.';
+		} else {
+			if (strpos($this->domain, '.')===false) {
+				$message = 'The domain <'.$this->domain.'> is a local domain and can not be configured for federation.';
+			} else {
+				$user->addAnnotation('net.lukasrosenstock.federatedprofile', array(
+					'profile_url' => 'http://'.$this->domain.'/',
+					'post_url_template' => 'http://'.$this->domain.'/post/{id}'
+				));
+				try {
+					$this->client->updateUser($user);
+					$message = 'The user profile has now been configured to use the domain <'.$this->domain.'> for app.net federation.';
+				} catch (\Exception $e) {
+					$message = 'The user profile could not be updated! Are you using a valid access token?!';
+				}
+			}
+				
+		}
+		
+		return new Response($message, 200, array('Content-Type' => 'text/plain'));
+	}
+	
 	/**
 	 * Initialize the PhpADNSite controller
 	 * @param array $config The instance configuration
@@ -177,6 +204,11 @@ class Controller implements ControllerProviderInterface {
 		$controllers->get('/posts/after/{id}', function($id) use ($controller) {
 			// Render posts after ID
 			return $controller->renderPostsAfter($id);
+		});
+		
+		$controllers->get('/setup/federation', function() use ($controller) {
+			// Check and set up federation on the user's profile
+			return $controller->setupFederation();
 		});
 		
 		return $controllers;

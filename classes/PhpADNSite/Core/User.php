@@ -145,6 +145,19 @@ class User {
 	}
 	
 	/**
+	 * Add an annotation to the user.
+	 * @param string $annotationType The annotation type, typically a reverse-hostname string
+	 * @param array $annotationValue The annotation value, must be an associative array.
+	 */
+	public function addAnnotation($annotationType, array $annotationValue) {
+		if (!isset($this->payload['annotations'])) $this->payload['annotations'] = array();
+		$this->payload['annotations'][] = array(
+			'type' => $annotationType,
+			'value' => $annotationValue
+		);
+	}
+	
+	/**
 	 * Returns a filtered amount of payload fields required for rendering a post. 
 	 */
 	public function getPayloadForTemplate() {
@@ -153,6 +166,15 @@ class User {
 		foreach ($fields as $f) {
 			if (isset($this->payload[$f])) $output[$f] = $this->payload[$f];
 		}
+		return $output;
+	}
+	
+	/**
+	 * Returns a filtered amount of payload fields required for updating the profile.
+	 */
+	public function getPayloadForUpdate() {
+		$output = $this->payload;
+		unset($output['description']['entities']);
 		return $output;
 	}
 }

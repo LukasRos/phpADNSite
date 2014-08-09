@@ -79,4 +79,17 @@ class GuzzleAPIClient implements APIClient {
 				->send()->json());
 	}
 	
+	public function retrieveUser() {
+		$response = $this->client
+			->get('users/@'.$this->username.'?include_annotations=1')
+			->send()->json();
+		return new User($response['data']);
+	}
+	
+	public function updateUser(User $user) {
+		$this->client->put('users/@'.$this->username.'?include_annotations=1',
+				array('Content-Type' => 'application/json'),
+				json_encode($user->getPayloadForUpdate()))->send();
+	}
+	
 }

@@ -57,4 +57,14 @@ interface APIClient {
 	 */
 	public function retrievePostsNewerThan($id, $count);
 
+	/**
+	 * Retrieve the user profile.
+	 */
+	public function retrieveUser();
+	
+	/**
+	 * Update the user profile.
+	 */
+	public function updateUser(User $user);
+
 }
