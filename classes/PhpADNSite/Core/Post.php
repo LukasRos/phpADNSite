@@ -216,7 +216,8 @@ class Post {
 	 * Returns a filtered amount of payload fields required for rendering a post. 
 	 */
 	public function getPayloadForTemplate() {
-		$fields = array('id', 'created_at', 'text', 'html', 'repost_of', 'num_stars', 'num_reposts', 'num_replies', 'source');
+		$fields = array('id', 'created_at', 'text', 'html', 'repost_of', 'num_stars', 'num_reposts',
+				'num_replies', 'source', 'reposters', 'starred_by');
 		$output = array();
 		foreach ($fields as $f) {
 			if (isset($this->payload[$f])) $output[$f] = $this->payload[$f];
