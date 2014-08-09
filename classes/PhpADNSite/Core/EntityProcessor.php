@@ -28,13 +28,16 @@ class EntityProcessor {
 		// Process Hashtags
 		foreach ($payload['entities']['hashtags'] as $entity) {
 			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
-			$html = preg_replace('/'.$entityText.'\b/', '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" rel="tag" href="/tagged/'.$entity['name'].'">'.$entityText.'</a>', $html);
+			$html = preg_replace('/'.$entityText.'\b/', '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" rel="tag" href="/tagged/'.$entity['name'].'">'.$entityText.'</a>', $html, 1);
 			$tags[] = $entity['name'];
 		}
 			
 		// Process Links
+		$processed = array();
 		foreach ($payload['entities']['links'] as $entity) {
 			$entityText = htmlentities(mb_substr($payload['text'], $entity['pos'], $entity['len']), 0, 'UTF-8');
+			if (in_array($entityText, $processed)) continue;
+			$processed[] = $entityText;
 			$charAfterText = mb_substr($payload['text'], $entity['pos']+$entity['len'], 1);
 			$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>', $html);
 		}
@@ -44,7 +47,7 @@ class EntityProcessor {
 			//$userUrl = isset($entity['x_user_url']) ? $entity['x_user_url'] : '/redirectToUser/'.$entity['name'];
 			$userUrl = 'https://alpha.app.net/'.$entity['name'];
 			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
-			$html = preg_replace('/'.$entityText.'\b/', '<a href="'.$userUrl.'">'.$entityText.'</a>', $html);
+			$html = preg_replace('/'.$entityText.'\b/', '<a href="'.$userUrl.'">'.$entityText.'</a>', $html, 1);
 		}
 			
 		return str_replace("\n", '<br />', $html);
