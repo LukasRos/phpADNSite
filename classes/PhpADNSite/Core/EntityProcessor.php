@@ -22,7 +22,7 @@ namespace PhpADNSite\Core;
 class EntityProcessor {
 	
 	public static function generateDefaultHTML($payload) {
-		$html = htmlentities($payload['text']);
+		$html = htmlentities($payload['text'], 0, 'UTF-8');
 		$tags = array();
 			
 		// Process Hashtags
@@ -34,9 +34,9 @@ class EntityProcessor {
 			
 		// Process Links
 		foreach ($payload['entities']['links'] as $entity) {
-			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
+			$entityText = htmlentities(mb_substr($payload['text'], $entity['pos'], $entity['len']), 0, 'UTF-8');
 			$charAfterText = mb_substr($payload['text'], $entity['pos']+$entity['len'], 1);
-			$html = str_replace(htmlentities($entityText), '<a href="'.htmlspecialchars($entity['url']).'">'.htmlentities($entityText).'</a>', $html);
+			$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>', $html);
 		}
 			
 		// Process User Mentions
