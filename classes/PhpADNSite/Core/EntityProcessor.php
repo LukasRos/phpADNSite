@@ -36,7 +36,7 @@ class EntityProcessor {
 		foreach ($payload['entities']['links'] as $entity) {
 			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
 			$charAfterText = mb_substr($payload['text'], $entity['pos']+$entity['len'], 1);
-			$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>', $html);
+			$html = str_replace(htmlentities($entityText), '<a href="'.htmlspecialchars($entity['url']).'">'.htmlentities($entityText).'</a>', $html);
 		}
 			
 		// Process User Mentions
