@@ -18,7 +18,7 @@ To run phpADNSite you need a webserver with PHP 5.3 or higher installed (includi
 6. Open the URL to your webserver in your browser. You should see your latest posts. Congratulations!
 
 ## Federation
-When phpADNSite shows other users, e.g. because they reposted/starred your posts or you reposted their posts, there is a link to their profile with points to the app.net Alpha microblogging client by default. However if the user is also running phpADNSite (or a compatible software) the links can go directly to their personal site on their domain! This is called app.net federation and can be easily set up:
+When phpADNSite shows other users, e.g. because they reposted/starred your posts or you reposted their posts, there is a link to their profile which points to the app.net Alpha microblogging client by default. However if the user is also running phpADNSite (or a compatible software) the links can go directly to their personal site on their domain! This is called app.net federation and can be easily set up:
 
 1. Verify the setup is complete and `http://yourdomain/` shows your recent posts. Go ahead only if *yourdomain* is a public domain on a public-facing server.
 2. Open the following URL: `http://yourdomain/setup/federation`. You should see this message: *The user profile has now been configured to use the domain <yourdomain> for app.net federation.*
