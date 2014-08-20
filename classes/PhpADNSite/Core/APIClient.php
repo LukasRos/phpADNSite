@@ -66,5 +66,15 @@ interface APIClient {
 	 * Update the user profile.
 	 */
 	public function updateUser(User $user);
+	
+	/**
+	 * Get the user's followers.
+	 */
+	public function getFollowers();
+	
+	/**
+	 * Get the user's followings.
+	 */
+	public function getFollowing();
 
 }

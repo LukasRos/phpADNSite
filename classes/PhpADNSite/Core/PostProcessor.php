@@ -44,13 +44,6 @@ class PostProcessor {
    		return $text;
 	}
 	
-	private function processUserAnnotations(User $user) {
-		if ($user->hasAnnotation('net.lukasrosenstock.federatedprofile')) {
-			$value = $user->getAnnotationValue('net.lukasrosenstock.federatedprofile');
-			$user->set('canonical_url', $value['profile_url']);
-		}
-	}
-	
 	public function renderForTemplate($viewType) {
 		$output = array();
 		
@@ -81,7 +74,7 @@ class PostProcessor {
 			if ($post->isRepost()) {
 				// Process repost
 				$originalPost = $post->getOriginalPost();
-				$this->processUserAnnotations($originalPost->get('user'));
+				UserProcessor::processAnnotations($originalPost->get('user'));
 				if (!$originalPost->has('html')) {
 					$originalPost->set('html', EntityProcessor::generateDefaultHTML($originalPost->getPayload()));
 				}
@@ -97,10 +90,10 @@ class PostProcessor {
 			
 			// Convert canonical URL for reposters and stargazers
 			if ($post->has('starred_by')) {
-				foreach ($post->get('starred_by') as $u) $this->processUserAnnotations($u);
+				foreach ($post->get('starred_by') as $u) UserProcessor::processAnnotations($u);
 			}
 			if ($post->has('reposters')) {
-				foreach ($post->get('reposters') as $u) $this->processUserAnnotations($u);
+				foreach ($post->get('reposters') as $u) UserProcessor::processAnnotations($u);
 			}
 			
 			$output[] = array(

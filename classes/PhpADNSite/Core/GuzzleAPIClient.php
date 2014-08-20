@@ -92,4 +92,16 @@ class GuzzleAPIClient implements APIClient {
 				json_encode($user->getPayloadForUpdate()))->send();
 	}
 	
+	public function getFollowers($count = 200) {
+		return new UserPage($this->client
+				->get('users/@'.$this->username.'/followers?count='.$count.'&include_annotations=1')
+				->send()->json());
+	}
+
+	public function getFollowing($count = 200) {
+		return new UserPage($this->client
+				->get('users/@'.$this->username.'/following?count='.$count.'&include_annotations=1')
+				->send()->json());
+	}
+	
 }

@@ -117,6 +117,29 @@ class Controller implements ControllerProviderInterface {
 		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
 	}
 	
+	private function convertUsers($users) {
+		$usersVars = array();
+		foreach ($users as $u) {
+			UserProcessor::processAnnotations($u);
+			$usersVars[] = $u->getPayloadForTemplate();
+		}
+		return $usersVars;
+	}
+	
+	public function renderFollowers() {
+		$user = $this->client->retrieveUser();
+		$users = $this->client->getFollowers();
+		return $this->generateResponse('followers.twig.html',
+				array('user' => $user->getPayloadForTemplate(), 'users' => $this->convertUsers($users)));
+	}
+	
+	public function renderFollowing() {
+		$user = $this->client->retrieveUser();
+		$users = $this->client->getFollowing();
+		return $this->generateResponse('following.twig.html',
+				array('user' => $user->getPayloadForTemplate(), 'users' => $this->convertUsers($users)));
+	}
+	
 	public function renderError(\Exception $e, $code) {
 		if ($this->config['debug']==true)
 			return new Response($e->getMessage(), $code, array('Content-Type' => 'text/plain'));
@@ -204,6 +227,16 @@ class Controller implements ControllerProviderInterface {
 		$controllers->get('/posts/after/{id}', function($id) use ($controller) {
 			// Render posts after ID
 			return $controller->renderPostsAfter($id);
+		});
+		
+		$controllers->get('/followers', function() use ($controller) {
+			// Render list of followers
+			return $controller->renderFollowers();
+		});
+		
+		$controllers->get('/following', function() use ($controller) {
+			// Render list of followings
+			return $controller->renderFollowing();
 		});
 		
 		$controllers->get('/setup/federation', function() use ($controller) {

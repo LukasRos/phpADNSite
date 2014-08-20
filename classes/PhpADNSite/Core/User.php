@@ -161,7 +161,7 @@ class User {
 	 * Returns a filtered amount of payload fields required for rendering a post. 
 	 */
 	public function getPayloadForTemplate() {
-		$fields = array('id', 'created_at', 'username', 'name', 'description', 'avatar_image', 'canonical_url');
+		$fields = array('id', 'created_at', 'username', 'name', 'description', 'avatar_image', 'canonical_url', 'counts');
 		$output = array();
 		foreach ($fields as $f) {
 			if (isset($this->payload[$f])) $output[$f] = $this->payload[$f];
