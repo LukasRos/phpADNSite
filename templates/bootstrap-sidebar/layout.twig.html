@@ -14,7 +14,8 @@
 			{% if user %}
 			<div class="col-md-4">
 				<h1><a href="/"><img src="{{user.avatar_image.url}}" class="img-circle head-avatar" /><br />{{user.name}}</a></h1>
-				<p class="text-center"><a href="/followers">{{user.counts.followers}} Followers</a> &#183; <a href="/following">{{user.counts.following}} Following</a></p>
+				<p class="text-center"><a href="javascript:window.open('https://alpha.app.net/intent/follow/?user_id={{user.id}}', 'adn-follow', 'width=500,height=350');">Follow on app.net</a> &#183; <a onclick="(function(btn){var z=document.createElement('script');document.subtomeBtn=btn;z.src='https://www.subtome.com/load.js';document.body.appendChild(z);})(this);return false;" href="/rss">Subscribe with RSS</a>
+					<br /><a href="/followers">{{user.counts.followers}} Followers</a> &#183; <a href="/following">{{user.counts.following}} Following</a></p>
 				<p class="text-center">{{user.description.html}}</p>
 			</div>
 			{% endif %}
