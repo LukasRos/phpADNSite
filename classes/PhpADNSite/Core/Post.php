@@ -23,13 +23,13 @@ namespace PhpADNSite\Core;
  * Class for a post for display. Contains the post payload and further meta data.
  */
 class Post {
-	
+
 	private $payload;
 	private $meta = array();
 	private $template = 'post.twig.html';
 	private $visible = true;
 	private $stopProcessing = false;
-	
+
 	public function __construct(array $payload) {
 		foreach ($payload as $key => $value) {
 			switch ($key) {
@@ -52,28 +52,28 @@ class Post {
 		}
 		$this->payload = $payload;
 	}
-	
+
 	/**
-	 * Returns the full post payload as an array in the format specified and returned by the app.net API.  
+	 * Returns the full post payload as an array in the format specified and returned by the app.net API.
 	 */
 	public function getPayload() {
 		return $this->payload;
 	}
-	
+
 	/**
 	 * Check if a payload field exists.
 	 */
 	public function has($key) {
 		return isset($this->payload[$key]);
 	}
-	
+
 	/**
 	 * Return a single field from the post payload.
 	 */
 	public function get($key) {
 		return @$this->payload[$key];
 	}
-	
+
 	/**
 	 * Update a single field in the post payload.
 	 */
@@ -81,7 +81,7 @@ class Post {
 		$this->payload[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Set the payload of the post. Plugins can use this method to modify the content.
 	 */
@@ -89,21 +89,21 @@ class Post {
 		$this->payload = $payload;
 		return $this;
 	}
-	
+
 	/**
 	 * Check if a meta field exists. Plugins can retrieve meta fields created by prior plugins in the chain.
 	 */
 	public function hasMetaField($key) {
 		return isset($this->meta[$key]);
 	}
-	
+
 	/**
 	 * Get a meta field. Plugins can retrieve meta fields created by prior plugins in the chain.
 	 */
 	public function getMetaField($key) {
 		return @$this->meta[$key];
 	}
-	
+
 	/**
 	 * Set a meta field. Plugins can specify meta fields for communicating with plugins further down the chain.
 	 */
@@ -111,21 +111,21 @@ class Post {
 		$this->meta[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Return all meta fields as array.
 	 */
 	public function getAllMetaFields() {
 		return $this->meta;
 	}
-	
+
 	/**
 	 * Gets the template used for rendering the post.
 	 */
 	public function getTemplate() {
 		return $this->template;
 	}
-	
+
 	/**
 	 * Sets the template used for rendering the post. Plugins can specify a custom template here.
 	 */
@@ -133,14 +133,14 @@ class Post {
 		$this->template = $template;
 		return $this;
 	}
-	
+
 	/**
 	 * Check if the post is visible or not. Posts are visible by default.
 	 */
 	public function isVisible() {
 		return $this->visible;
 	}
-	
+
 	/**
 	 * Toggle visibility of the posts. Plugins can use this to filter posts.
 	 */
@@ -148,14 +148,14 @@ class Post {
 		$this->visible = $visible;
 		return $this;
 	}
-	
+
 	/**
 	 * Check if processing of this post has stopped.
 	 */
 	public function isProcessingStopped() {
 		return $this->stopProcessing;
 	}
-	
+
 	/**
 	 * Sets a processing stop in order to prevent plugins further down the chain from reading or modifying this post.
 	 */
@@ -163,7 +163,7 @@ class Post {
 		$this->stopProcessing = true;
 		return $this;
 	}
-	
+
 	/**
 	 * Checks whether this post has at least one annotation with the given type.
 	 * @param string $annotationType The annotation type, typically a reverse-hostname string
@@ -176,7 +176,7 @@ class Post {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns the value of the first annotation with the given type.
 	 * @param string $annotationType The annotation type, typically a reverse-hostname string
@@ -189,7 +189,7 @@ class Post {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the values of all annotations with the given type.
 	 * @param string $annotationType The annotation type, typically a reverse-hostname string
@@ -203,14 +203,14 @@ class Post {
 		}
 		return $annotations;
 	}
-	
+
 	/**
 	 * Indicates whether this post is a repost of another post.
 	 */
 	public function isRepost() {
 		return isset($this->payload['repost_of']);
 	}
-	
+
 	/**
 	 * If this post is a repost, returns the original post as a post object.
 	 */
@@ -218,20 +218,21 @@ class Post {
 		if (!$this->isRepost()) return null;
 		return $this->payload['repost_of'];
 	}
-	
+
 	/**
-	 * Returns a filtered amount of payload fields required for rendering a post. 
+	 * Returns a filtered amount of payload fields required for rendering a post.
 	 */
 	public function getPayloadForTemplate($includeUser = false) {
 		$output = array();
-		
+
 		// Copy plain fields
-		$fields = array('id', 'created_at', 'text', 'html', 'repost_of', 'num_stars', 'num_reposts',
+		$fields = array('id', 'canonical_url', 'created_at', 'text', 'html',
+				'repost_of', 'num_stars', 'num_reposts',
 				'num_replies', 'source');
 		foreach ($fields as $f) {
 			if (isset($this->payload[$f])) $output[$f] = $this->payload[$f];
 		}
-		
+
 		$fields = array('starred_by', 'reposters');
 		// Convertable fields
 		foreach ($fields as $f) {
@@ -239,11 +240,11 @@ class Post {
 				$converted = array();
 				foreach ($this->payload[$f] as $p) $converted[] = $p->getPayloadForTemplate();
 				$output[$f] = $converted;
-			}	
+			}
 		}
 		if ($includeUser) $output['user'] = $this->payload['user']->getPayloadForTemplate();
 		if ($this->isRepost()) $output['repost_of'] = $this->getOriginalPost()->getPayloadForTemplate(true);
-		
+
 		return $output;
 	}
 }

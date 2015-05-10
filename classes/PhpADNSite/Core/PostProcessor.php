@@ -23,18 +23,18 @@ class PostProcessor {
 
 	private $posts = array();
 	private $plugins = array();
-		
+
 	public function __construct(array $plugins) {
 		foreach ($plugins as $plugin) {
 			if (!in_array('PhpADNSite\Core\Plugin',class_implements($plugin))) throw new \Exception("The plugin class <".$plugin."> does not implement the expected interface.");
 			$this->plugins[] = new $plugin;
 		}
 	}
-	
+
 	public function add(Post $post) {
 		$this->posts[] = $post;
 	}
-	
+
 	private function truncate($text, $length) {
 		// truncate a string only at a whitespace (by nogdog)
 		// taken (modified) from: http://stackoverflow.com/a/972031
@@ -43,10 +43,10 @@ class PostProcessor {
    		}
    		return $text;
 	}
-	
+
 	public function renderForTemplate($viewType) {
 		$output = array();
-		
+
 		// Call all registered plugins
 		foreach ($this->plugins as $plugin) {
 			foreach ($this->posts as $p) {
@@ -54,9 +54,9 @@ class PostProcessor {
 			}
 			$plugin->processAll($viewType);
 		}
-		
+
 		$user = null;
-		
+
 		foreach ($this->posts as $post) {
 			if (!$user) {
 				$user = $post->get('user');
@@ -66,7 +66,7 @@ class PostProcessor {
 				));
 			}
 			if (!$post->isVisible()) continue;
-			
+
 			$payload = $post->getPayload();
 			if (!isset($payload['html'])) {
 				$post->set('html', EntityProcessor::generateDefaultHTML($payload));
@@ -79,7 +79,7 @@ class PostProcessor {
 					$originalPost->set('html', EntityProcessor::generateDefaultHTML($originalPost->getPayload()));
 				}
 			}
-			
+
 			if (!$post->hasMetaField('title')) {
 				// Generate a title for listings, e.g. in an RSS feed
 				if (isset($payload['entities']['links']) && count($payload['entities']['links'])>0
@@ -87,7 +87,7 @@ class PostProcessor {
 					$post->setMetaField('title', substr($payload['text'], 0, $payload['entities']['links'][0]['pos']-1));
 				else $post->setMetaField('title', $this->truncate($payload['text'], 80));
 			}
-			
+
 			// Convert canonical URL for reposters and stargazers
 			if ($post->has('starred_by')) {
 				foreach ($post->get('starred_by') as $u) UserProcessor::processAnnotations($u);
@@ -95,15 +95,15 @@ class PostProcessor {
 			if ($post->has('reposters')) {
 				foreach ($post->get('reposters') as $u) UserProcessor::processAnnotations($u);
 			}
-			
+
 			$output[] = array(
 				'template' => $post->getTemplate(),
-				'post' => $post->getPayloadForTemplate(),
-				'meta' => $post->getAllMetaFields()	
+				'post' => $post->getPayloadForTemplate(($viewType == View::PERMALINK)),
+				'meta' => $post->getAllMetaFields()
 			);
 		}
-		
+
 		return array('user' => $user->getPayloadForTemplate(), 'posts' => $output);
 	}
-	
+
 }

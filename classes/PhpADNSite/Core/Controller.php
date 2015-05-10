@@ -100,10 +100,18 @@ class Controller implements ControllerProviderInterface {
 
 	public function renderPermalinkPage($postId) {
 		$processor = new PostProcessor($this->config['plugins']);
-		$post = $this->client->retrieveSinglePost($postId);
-		if (!$post) throw new FileNotFoundException('/post/'.$postId);
-		$processor->add($post);
-		if (!$post->isVisible()) throw new FileNotFoundException('/post/'.$postId);
+		$posts = $this->client->retrievePostThread($postId);
+		$originalPost = null;
+		$postDirectReplies = array();
+		foreach ($posts as $post) {
+			if ($post->get('id')==$postId) $originalPost = $post;
+			else if ($post->get('reply_to')==$postId) $postDirectReplies[] = $post;
+		}
+		if (!$originalPost) throw new FileNotFoundException('/post/'.$postId);
+		if (!$originalPost->isVisible()) throw new FileNotFoundException('/post/'.$postId);
+
+		$processor->add($originalPost);
+		foreach (array_reverse($postDirectReplies) as $p) $processor->add($p);
 		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate(View::PERMALINK));
 	}
 

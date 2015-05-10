@@ -43,6 +43,12 @@ interface APIClient {
 	public function retrieveSinglePost($id);
 
 	/**
+	 * Retrieves a post and its replies.
+	 * @param integer $id The ID of the post.
+	 */
+	public function retrievePostThread($id);
+
+	/**
 	 * Retrieve posts from the user with a specific #hashtag.
 	 */
 	public function retrievePostsWithHashtag($tag);
