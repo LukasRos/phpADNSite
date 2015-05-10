@@ -23,7 +23,7 @@ namespace PhpADNSite\Core;
  * Generic interface for API clients.
  */
 interface APIClient {
-	
+
 	/**
 	 * Set the configuration for a particular user. This is called before any other method is called.
 	 * @param array $globalConfiguration
@@ -35,23 +35,23 @@ interface APIClient {
 	 * Retrieve the recent posts from the user.
 	 */
 	public function retrieveRecentPosts();
-	
+
 	/**
 	 * Retrieve a single post by its ID.
 	 * @param integer $id The ID of the post.
 	 */
 	public function retrieveSinglePost($id);
-	
+
 	/**
 	 * Retrieve posts from the user with a specific #hashtag.
 	 */
 	public function retrievePostsWithHashtag($tag);
-	
+
 	/**
 	 * Retrieve posts older than a specific post ID.
 	 */
 	public function retrievePostsOlderThan($id, $count);
-	
+
 	/**
 	 * Retrieve posts newer than a specific post ID.
 	 */
@@ -61,20 +61,25 @@ interface APIClient {
 	 * Retrieve the user profile.
 	 */
 	public function retrieveUser();
-	
+
 	/**
 	 * Update the user profile.
 	 */
 	public function updateUser(User $user);
-	
+
 	/**
 	 * Get the user's followers.
 	 */
 	public function getFollowers();
-	
+
 	/**
 	 * Get the user's followings.
 	 */
 	public function getFollowing();
+
+	/**
+	 * Create a post.
+	 */
+	public function createPost($post);
 
 }

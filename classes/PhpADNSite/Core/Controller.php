@@ -22,40 +22,41 @@ namespace PhpADNSite\Core;
 use Silex\Application, Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request, Symfony\Component\HttpFoundation\Response, Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use PhpADNSite\Webmention\Handler;
 
 class Controller implements ControllerProviderInterface {
-	
+
 	private $client;
 	private $twig;
 	private $config;
 	private $domain;
-	
+
 	public function generateResponse($template, $postData, $customPageVars = array()) {
 		return $this->twig->render($template, array_merge($postData, array(
 			'site_url' => 'http://'.$this->domain.'/',
 			'vars' => $this->config['domains'][$this->domain]['theme_config']['variables']
 		), $customPageVars));
 	}
-	
+
 	public function initializeWithDomain($domain) {
 		// Load configuration
 		if (!isset($this->config['domains'][$domain])) throw new \Exception("The domain <".$domain."> is not configured on this instance.");
 		$this->domain = $domain;
 		$domainConfig = $this->config['domains'][$domain];
-		
+
 		// Configure backend
 		if (!isset($domainConfig['backend_config'])) throw new \Exception("Backend configuration for <".$domain."> not found.");
 		$this->client->configure($this->config['backend']['config'], $domainConfig['backend_config']);
-		
+
 		// Configure theme
 		$this->twig = new \Twig_Environment(
 				new \Twig_Loader_Filesystem(__DIR__.'/../../../templates/'.$domainConfig['theme_config']['name']),
 				array('cache' => null, 'autoescape' => false));
-		
-		
+
+
 		return true;
 	}
-	
+
 	public function renderRecentPosts() {
 		$processor = new PostProcessor($this->config['plugins']);
 		$page = $this->client->retrieveRecentPosts();
@@ -66,7 +67,7 @@ class Controller implements ControllerProviderInterface {
 			)
 		));
 	}
-	
+
 	public function renderPostsBefore($id) {
 		$processor = new PostProcessor($this->config['plugins']);
 		$page = $this->client->retrievePostsOlderThan($id);
@@ -76,9 +77,9 @@ class Controller implements ControllerProviderInterface {
 					'older' => ($page->hasMore()) ? $page->getMinID() : null,
 					'newer' => $page->getMaxID()
 				)
-		));		
+		));
 	}
-	
+
 	public function renderPostsAfter($id) {
 		$processor = new PostProcessor($this->config['plugins']);
 		$page = $this->client->retrievePostsNewerThan($id);
@@ -90,33 +91,33 @@ class Controller implements ControllerProviderInterface {
 				)
 		));
 	}
-	
+
 	public function renderRecentPostsRSS() {
 		$processor = new PostProcessor($this->config['plugins']);
 		foreach ($this->client->retrieveRecentPosts() as $post) $processor->add($post);
 		return new Response($this->generateResponse('rss.twig.xml', $processor->renderForTemplate(View::STREAM)), 200, array('Content-Type' => 'application/rss+xml'));
 	}
-	
+
 	public function renderPermalinkPage($postId) {
 		$processor = new PostProcessor($this->config['plugins']);
 		$post = $this->client->retrieveSinglePost($postId);
-		if (!$post) throw new FileNotFoundException('/post/'.$postId); 
+		if (!$post) throw new FileNotFoundException('/post/'.$postId);
 		$processor->add($post);
 		if (!$post->isVisible()) throw new FileNotFoundException('/post/'.$postId);
 		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate(View::PERMALINK));
 	}
-	
+
 	public function renderPostsWithHashtag($tag) {
 		if ($tag!=strtolower($tag)) {
 			// for upper- or camelcase hashtags redirect to the lowercase version
 			return new RedirectResponse('/tagged/'.strtolower($tag));
 		}
-		
+
 		$processor = new PostProcessor($this->config['plugins']);
 		foreach ($this->client->retrievePostsWithHashtag($tag) as $post) $processor->add($post);
 		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
 	}
-	
+
 	private function convertUsers($users) {
 		$usersVars = array();
 		foreach ($users as $u) {
@@ -125,30 +126,30 @@ class Controller implements ControllerProviderInterface {
 		}
 		return $usersVars;
 	}
-	
+
 	public function renderFollowers() {
 		$user = $this->client->retrieveUser();
 		$users = $this->client->getFollowers();
 		return $this->generateResponse('followers.twig.html',
 				array('user' => $user->getPayloadForTemplate(), 'users' => $this->convertUsers($users)));
 	}
-	
+
 	public function renderFollowing() {
 		$user = $this->client->retrieveUser();
 		$users = $this->client->getFollowing();
 		return $this->generateResponse('following.twig.html',
 				array('user' => $user->getPayloadForTemplate(), 'users' => $this->convertUsers($users)));
 	}
-	
+
 	public function renderError(\Exception $e, $code) {
 		if ($this->config['debug']==true)
 			return new Response($e->getMessage(), $code, array('Content-Type' => 'text/plain'));
 		else
 			return new Response($this->generateResponse('404.twig.html', array()), $code);
 	}
-	
+
 	public function setupFederation() {
-		$user = $this->client->retrieveUser();		
+		$user = $this->client->retrieveUser();
 		if ($user->hasAnnotation('net.lukasrosenstock.federatedprofile')
 				&& ($value = $user->getAnnotationValue('net.lukasrosenstock.federatedprofile'))
 				&& $value['profile_url']=='http://'.$this->domain.'/') {
@@ -168,12 +169,12 @@ class Controller implements ControllerProviderInterface {
 					$message = 'The user profile could not be updated! Are you using a valid access token?!';
 				}
 			}
-				
+
 		}
-		
+
 		return new Response($message, 200, array('Content-Type' => 'text/plain'));
 	}
-	
+
 	/**
 	 * Initialize the PhpADNSite controller
 	 * @param array $config The instance configuration
@@ -184,67 +185,72 @@ class Controller implements ControllerProviderInterface {
 		$this->client = new $backendClass();
 		$this->config = $config;
 	}
-	
+
 	public function connect(Application $app) {
 		mb_internal_encoding("UTF-8");
 		$controllers = $app['controllers_factory'];
 
 		$controller = $this;
-		
+
 		$controllers->before(function(Request $r) use ($app, $controller) {
 			$controller->initializeWithDomain($r->getHost());
 		});
-		
+
 		$app->error(function(\Exception $e, $code) use ($app, $controller) {
 			return $controller->renderError($e, $code);
 		});
-	
+
 		$controllers->get('/', function() use ($controller) {
 			// Render the homepage with recent posts
 			return $controller->renderRecentPosts();
 		});
-		
+
 		$controllers->get('/rss', function() use ($controller) {
 			// Render the RSS feed of recent posts
 			return $controller->renderRecentPostsRSS();
 		});
-		
+
 		$controllers->get('/post/{postId}', function($postId) use ($controller) {
 			// Render a single post
 			return $controller->renderPermalinkPage($postId);
 		});
-	
+
 		$controllers->get('/tagged/{tag}', function($tag) use ($controller) {
 			// Render posts with a specific hashtag
 			return $controller->renderPostsWithHashtag($tag);
 		});
-		
+
 		$controllers->get('/posts/before/{id}', function($id) use ($controller) {
 			// Render posts before ID
 			return $controller->renderPostsBefore($id);
 		});
-		
+
 		$controllers->get('/posts/after/{id}', function($id) use ($controller) {
 			// Render posts after ID
 			return $controller->renderPostsAfter($id);
 		});
-		
+
 		$controllers->get('/followers', function() use ($controller) {
 			// Render list of followers
 			return $controller->renderFollowers();
 		});
-		
+
 		$controllers->get('/following', function() use ($controller) {
 			// Render list of followings
 			return $controller->renderFollowing();
 		});
-		
+
 		$controllers->get('/setup/federation', function() use ($controller) {
 			// Check and set up federation on the user's profile
 			return $controller->setupFederation();
 		});
-		
+
+		$controllers->post('/webmention', function(Request $r) use ($controller) {
+			// Handle incoming webmentions
+			return Handler::handleWebmention($r, $this->domain, $this->client);
+		});
+
 		return $controllers;
 	}
-	
+
 }
