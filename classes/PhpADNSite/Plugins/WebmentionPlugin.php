@@ -1,7 +1,7 @@
 <?php
 
 /*  phpADNSite
- Copyright (C) 2014 Lukas Rosenstock
+ Copyright (C) 2015 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -56,7 +56,7 @@ class WebmentionPlugin implements Plugin {
             $post->set('html', '<span class="glyphicon glyphicon-retweet"></span> '.$annotation['author'].' reposted this.');
             break;
           case ExternalPost::TYPE_REPLY:
-            $post->set('html', '<span class="glyphicon glyphicon-comment"></span> '.$annotation['author'].' wrote a reply this.');
+            $post->set('html', '<span class="glyphicon glyphicon-comment"></span> '.$annotation['author'].' wrote a reply to this.');
             break;
         }
       }
