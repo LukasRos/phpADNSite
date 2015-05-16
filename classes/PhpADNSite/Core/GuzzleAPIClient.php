@@ -63,7 +63,9 @@ class GuzzleAPIClient implements APIClient {
 		$response = $this->client
 				->get('posts/'.$id.'/replies?include_deleted=0&include_annotations=1&include_html=0&include_starred_by=1&include_reposters=1')
 				->send()->json();
-		if ($response['data'][0]['user']['username']!=$this->username) return null;
+		foreach ($response['data'] as $post) {
+			if ($post['id']==$id && $post['user']['username']!=$this->username) return null;
+		}
 		return new PostPage($response);
 	}
 
