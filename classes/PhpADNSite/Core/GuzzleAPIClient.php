@@ -1,7 +1,7 @@
 <?php
 
 /*  phpADNSite
- Copyright (C) 2014 Lukas Rosenstock
+ Copyright (C) 2014-2015 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -60,9 +60,11 @@ class GuzzleAPIClient implements APIClient {
 	}
 
 	public function retrievePostThread($id) {
-		return new PostPage($this->client
+		$response = $this->client
 				->get('posts/'.$id.'/replies?include_deleted=0&include_annotations=1&include_html=0&include_starred_by=1&include_reposters=1')
-				->send()->json());
+				->send()->json();
+		if ($response['data'][0]['user']['username']!=$this->username) return null;
+		return new PostPage($response);
 	}
 
 	public function retrievePostsWithHashtag($tag) {

@@ -1,7 +1,7 @@
 <?php
 
 /*  phpADNSite
- Copyright (C) 2014 Lukas Rosenstock
+ Copyright (C) 2014-2015 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -101,14 +101,13 @@ class Controller implements ControllerProviderInterface {
 	public function renderPermalinkPage($postId) {
 		$processor = new PostProcessor($this->config['plugins']);
 		$posts = $this->client->retrievePostThread($postId);
+		if (!$posts) throw new FileNotFoundException('/post/'.$postId);
 		$originalPost = null;
 		$postDirectReplies = array();
 		foreach ($posts as $post) {
 			if ($post->get('id')==$postId) $originalPost = $post;
 			else if ($post->get('reply_to')==$postId) $postDirectReplies[] = $post;
 		}
-		if (!$originalPost) throw new FileNotFoundException('/post/'.$postId);
-		if (!$originalPost->isVisible()) throw new FileNotFoundException('/post/'.$postId);
 
 		$processor->add($originalPost);
 		foreach (array_reverse($postDirectReplies) as $p) $processor->add($p);
