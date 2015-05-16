@@ -1,7 +1,7 @@
 <?php
 
 /*  phpADNSite
- Copyright (C) 2014 Lukas Rosenstock
+ Copyright (C) 2014-2015 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace PhpADNSite\Plugins;
 
+use Michelf\Markdown;
 use PhpADNSite\Core\View, PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
 
 /**
@@ -27,36 +28,37 @@ use PhpADNSite\Core\View, PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
  * template.
  */
 class LongPostsPlugin implements Plugin {
-	
-	const ANNOTATION_TYPE = 'net.jazzychad.adnblog.post';	
+
+	const ANNOTATION_TYPE = 'net.jazzychad.adnblog.post';
 	const TRUNCATED_PARAGRAPH_COUNT = 2;
-	
+
 	private $posts = array();
-	
+
 	public function add(Post $post) {
 		$this->posts[] = $post;
 	}
-	
+
 	public function processAll($viewType) {
 		foreach ($this->posts as $post) {
 			if (!$post->isRepost() && $post->hasAnnotation(self::ANNOTATION_TYPE)) {
 				// Use longpost template
 				$post->setTemplate('longpost.twig.html');
-				
-				// Convert longpost annotation to HTML and move to meta for access from the template 
+
+				// Convert longpost annotation to HTML and move to meta for access from the template
 				$annotation = $post->getAnnotationValue(self::ANNOTATION_TYPE);
 				$post->setMetaField('title', $annotation['title']);
 				$post->setMetaField('truncated', false);
-				
-				$bodyLines = explode("\n", $annotation['body']);
-				$body = '';
+
 				if ($viewType==View::PERMALINK) {
-					foreach ($bodyLines as $l) if (trim($l)!='') $body .= '<p>'.$l.'</p>';					
+					$body = $annotation['body'];
 				} else {
+					$bodyLines = explode("\n", $annotation['body']);
+					$body = '';
+
 					$i = 0;
 					foreach ($bodyLines as $l) {
 						if (trim($l)!='') {
-							$body .= '<p>'.$l.'</p>';
+							$body .= $l."\n\n";
 							$i++;
 							if ($i>=self::TRUNCATED_PARAGRAPH_COUNT) {
 								$post->setMetaField('truncated', true);
@@ -65,8 +67,8 @@ class LongPostsPlugin implements Plugin {
 						}
 					}
 				}
-				$post->set('html', $body);
-				
+				$post->set('html', Markdown::defaultTransform($body));
+
 				// Do not handle other annotations
 				$post->stopProcessing();
 			}

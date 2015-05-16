@@ -11,7 +11,8 @@
     "silex/silex": "1.0.*",
 		"mf2/mf2": "v0.2.10",
 		"twig/twig": "v1.12.1",
-		"guzzle/http" : "v3.7.4"
+		"guzzle/http" : "v3.7.4",
+		"michelf/php-markdown" : "1.5.0"
     },
     "autoload": {
 		"psr-0": {
