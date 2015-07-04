@@ -34,15 +34,23 @@ class Controller implements ControllerProviderInterface {
 	public function generateResponse($template, $postData, $customPageVars = array()) {
 		return $this->twig->render($template, array_merge($postData, array(
 			'site_url' => 'http://'.$this->domain.'/',
-			'vars' => $this->config['domains'][$this->domain]['theme_config']['variables']
+			'vars' => isset($this->config['domains'][$this->domain])
+				? $this->config['domains'][$this->domain]['theme_config']['variables']
+				: $this->config['domains']['*']['theme_config']['variables']
 		), $customPageVars));
 	}
 
 	public function initializeWithDomain($domain) {
-		// Load configuration
-		if (!isset($this->config['domains'][$domain])) throw new \Exception("The domain <".$domain."> is not configured on this instance.");
 		$this->domain = $domain;
-		$domainConfig = $this->config['domains'][$domain];
+
+		// Load configuration
+		if (isset($this->config['domains'][$domain])) {
+			$domainConfig = $this->config['domains'][$domain];
+		} else
+		if (isset($this->config['domains']['*'])) {
+			$domainConfig = $this->config['domains']['*'];
+		} else
+			throw new \Exception("The domain <".$domain."> is not configured on this instance.");
 
 		// Configure backend
 		if (!isset($domainConfig['backend_config'])) throw new \Exception("Backend configuration for <".$domain."> not found.");
