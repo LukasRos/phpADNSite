@@ -26,25 +26,25 @@ use PhpADNSite\Core\View, PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
  * can be used from templates more easily.
  */
 class OEmbedProcessor implements Plugin {
-	
+
 	const ANNOTATION_TYPE = 'net.app.core.oembed';
-	
+
 	private $posts = array();
-	
+
 	public function add(Post $post) {
 		$this->posts[] = $post;
 	}
-	
+
 	public function processAll($viewType) {
 		foreach ($this->posts as $post) {
-			
+
 			if ($post->isRepost())
 				$originalPost = $post->getOriginalPost();
 			else
 				$originalPost = $post;
-			
+
 			if (!$originalPost->hasAnnotation(self::ANNOTATION_TYPE)) continue;
-			
+
 			$annotation = $originalPost->getAnnotationValue(self::ANNOTATION_TYPE);
 			if ($annotation['type']=='photo') {
 				if ($viewType==View::PERMALINK) {
@@ -52,7 +52,8 @@ class OEmbedProcessor implements Plugin {
 					$post->setMetaField('img', $annotation['url']);
 				} else {
 					// include only thumbnail in stream
-					$post->setMetaField('img', $annotation['thumbnail_url']);
+					$post->setMetaField('img', isset($annotation['thumbnail_url'])
+						? $annotation['thumbnail_url'] : $annotation['url']);
 				}
 			}
 		}
