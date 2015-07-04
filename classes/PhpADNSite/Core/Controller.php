@@ -133,6 +133,13 @@ class Controller implements ControllerProviderInterface {
 		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
 	}
 
+	public function renderRSS(array $posts) {
+		$processor = new PostProcessor($this->config['plugins']);
+		foreach ($posts as $post) $processor->add($post);
+		return new Response($this->generateResponse('rss.twig.xml', $processor->renderForTemplate(View::STREAM)),
+			200, array('Content-Type' => 'application/rss+xml'));
+	}
+
 	private function convertUsers($users) {
 		$usersVars = array();
 		foreach ($users as $u) {
@@ -223,6 +230,11 @@ class Controller implements ControllerProviderInterface {
 		$controllers->get('/rss', function() use ($controller) {
 			// Render the RSS feed of recent posts
 			return $controller->renderRecentPostsRSS();
+		});
+
+		$controllers->get('/tagged/{tag}/rss', function($tag) use ($controller) {
+			// Render the RSS feed for a specific hashtag
+			return $controller->renderRSS($this->client->retrievePostsWithHashtag($tag));
 		});
 
 		$controllers->get('/post/{postId}', function($postId) use ($controller) {

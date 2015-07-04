@@ -1,5 +1,9 @@
 {% extends "layout.twig.html" %}
 
+{% block meta %}
+<link rel="alternate" type="application/rss+xml" href="{{site_url}}tagged/{{tag}}/rss" />
+{% endblock %}
+
 {% block content %}
 <div>
 	<h2 class="text-center">#{{tag}}</h2>

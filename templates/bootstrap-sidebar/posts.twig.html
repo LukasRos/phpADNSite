@@ -1,5 +1,9 @@
 {% extends "layout.twig.html" %}
 
+{% block meta %}
+<link rel="alternate" type="application/rss+xml" href="{{site_url}}rss" />
+{% endblock %}
+
 {% block content %}
 {% for p in posts %}
 <article class="h-entry">
