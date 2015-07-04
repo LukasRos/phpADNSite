@@ -1,5 +1,9 @@
 {% extends "layout.twig.html" %}
 
+{% block title %}
+  {% if posts[0].meta.title %}{{posts[0].meta.title}} - {% endif %}
+{% endblock %}
+
 {% block content %}
 <article class="h-entry">
 {% include posts[0].template with {'post':posts[0].post, 'meta':posts[0].meta} only %}
