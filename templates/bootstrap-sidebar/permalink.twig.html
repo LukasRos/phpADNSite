@@ -5,9 +5,9 @@
 {% endblock %}
 
 {% block content %}
-<article class="h-entry">
+<article class="h-entry" typeof="schema:BlogPosting">
 {% include posts[0].template with {'post':posts[0].post, 'meta':posts[0].meta} only %}
-<p class="text-right"><time class="dt-published" datetime="{{posts[0].post.created_at|date('Y-m-d H:i')}}">{{posts[0].post.created_at|date('Y/m/d H:i')}}</time> &#183; via <a href="{{posts[0].post.source.link}}">{{posts[0].post.source.name}}</a></p>
+<p class="text-right"><time class="dt-published" datetime="{{posts[0].post.created_at|date('Y-m-d H:i')}}" property="schema:datePublished">{{posts[0].post.created_at|date('Y/m/d H:i')}}</time> &#183; via <a href="{{posts[0].post.source.link}}">{{posts[0].post.source.name}}</a></p>
 </article>
 {% if posts[0].post.starred_by %}
 <div class="panel panel-default">
