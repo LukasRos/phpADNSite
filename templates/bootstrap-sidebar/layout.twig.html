@@ -13,11 +13,12 @@
 	<div class="container">
 		<div class="row">
 			{% if user %}
-			<div class="col-md-4 h-card">
-				<h1><a rel="me" class="u-url" href="/"><img src="{{user.avatar_image.url}}" class="img-circle head-avatar u-photo" /><br /><span class="p-name">{{user.name}}</span></a></h1>
+			<div class="col-md-4 h-card" typeof="schema:Person">
+				<h1><a rel="me" class="u-url" href="/" property="schema:url"><img src="{{user.avatar_image.url}}" class="img-circle head-avatar u-photo" property="schema:image" /><br /><span class="p-name" property="schema:name">{{user.name}}</span></a></h1>
 				<p class="text-center"><a href="javascript:window.open('https://alpha.app.net/intent/follow/?user_id={{user.id}}', 'adn-follow', 'width=500,height=350');">Follow on app.net</a> &#183; <a onclick="(function(btn){var z=document.createElement('script');document.subtomeBtn=btn;z.src='https://www.subtome.com/load.js';document.body.appendChild(z);})(this);return false;" href="/rss">Subscribe with RSS</a>
 					<br /><a href="/followers">{{user.counts.followers}} Followers</a> &#183; <a href="/following">{{user.counts.following}} Following</a></p>
-				<p class="text-center p-note">{{user.description.html}}</p>
+				<p class="text-center p-note" property="schema:description">{{user.description.html}}</p>
+				<meta property="schema:sameAs" content="https://alpha.app.net/{{user.username}}" />
 			</div>
 			{% endif %}
 			<div class="col-md-8">
