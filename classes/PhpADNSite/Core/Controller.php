@@ -117,6 +117,7 @@ class Controller implements ControllerProviderInterface {
 			else if ($post->get('reply_to')==$postId) $postDirectReplies[] = $post;
 		}
 
+		if (!$originalPost) throw new FileNotFoundException('/post/'.$postId);
 		$processor->add($originalPost);
 		foreach (array_reverse($postDirectReplies) as $p) $processor->add($p);
 		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate(View::PERMALINK));
@@ -219,7 +220,12 @@ class Controller implements ControllerProviderInterface {
 		});
 
 		$app->error(function(\Exception $e, $code) use ($app, $controller) {
-			return $controller->renderError($e, $code);
+			try {
+				if (!isset($controller->domain)) $controller->initializeWithDomain($app['request']->getHost());
+				return $controller->renderError($e, $code);
+			} catch (\Exception $e) {
+				return $e->getMessage();
+			}
 		});
 
 		$controllers->get('/', function() use ($controller) {
