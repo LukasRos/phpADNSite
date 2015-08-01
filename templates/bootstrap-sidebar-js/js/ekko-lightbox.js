@@ -321,14 +321,16 @@ License: https://github.com/ashleydw/lightbox/blob/master/LICENSE
       if ((onLoadShowImage == null) || onLoadShowImage === true) {
         img.onload = function() {
           var image;
+          var maxh = $(window).height() * 0.8; //% of screen height
           image = $('<img />');
           image.attr('src', img.src);
+          image.attr('style', "max-height: " + maxh +"px");
           image.addClass('img-responsive');
           _this.lightbox_body.html(image);
           if (_this.modal_arrows) {
             _this.modal_arrows.css('display', 'block');
           }
-          _this.resize(img.width);
+          _this.resize(Math.min(maxh / img.height, 1) * img.width);
           return _this.options.onContentLoaded.call(_this);
         };
         img.onerror = function() {
