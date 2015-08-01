@@ -55,6 +55,8 @@ License: https://github.com/ashleydw/lightbox/blob/master/LICENSE
       }
       _this.modal.remove();
       return _this.options.onHidden.call(_this);
+    }).click(function() {
+      return _this.modal.modal('hide');
     }).modal('show', options);
     return this.modal;
   };
