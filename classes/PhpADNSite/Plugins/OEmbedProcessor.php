@@ -59,6 +59,9 @@ class OEmbedProcessor implements Plugin {
 						$post->setMetaField('img', $annotation['url']);
 					}
 				}
+				if (isset($annotation['title'])) {
+					$post->setMetaField('img_alt', $annotation['title']);
+				}
 			}
 		}
 	}
