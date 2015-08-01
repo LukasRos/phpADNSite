@@ -1,0 +1,9 @@
+{% extends "layout.twig.html" %}
+
+{% block content %}
+<p>These users are following me on app.net:</p>
+{% for u in users %}
+{% include 'user.twig.html' with {'user':u} only %}
+{% endfor %}
+
+{% endblock %}
