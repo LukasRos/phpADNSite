@@ -20,18 +20,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace PhpADNSite\Core;
 
 class EntityProcessor {
-	
+
 	public static function generateDefaultHTML($payload) {
 		$html = htmlentities($payload['text'], 0, 'UTF-8');
 		$tags = array();
-			
+
 		// Process Hashtags
 		foreach ($payload['entities']['hashtags'] as $entity) {
-			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
+			$entityText = htmlentities(mb_substr($payload['text'], $entity['pos'], $entity['len'], 'UTF-8'), 0, 'UTF-8');
 			$html = preg_replace('/'.$entityText.'\b/', '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" rel="tag" href="/tagged/'.$entity['name'].'">'.$entityText.'</a>', $html, 1);
 			$tags[] = $entity['name'];
 		}
-			
+
 		// Process Links
 		$processed = array();
 		foreach ($payload['entities']['links'] as $entity) {
@@ -41,7 +41,7 @@ class EntityProcessor {
 			$charAfterText = mb_substr($payload['text'], $entity['pos']+$entity['len'], 1);
 			$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>', $html);
 		}
-			
+
 		// Process User Mentions
 		foreach ($payload['entities']['mentions'] as $entity) {
 			//$userUrl = isset($entity['x_user_url']) ? $entity['x_user_url'] : '/redirectToUser/'.$entity['name'];
@@ -49,7 +49,7 @@ class EntityProcessor {
 			$entityText = mb_substr($payload['text'], $entity['pos'], $entity['len']);
 			$html = preg_replace('/'.$entityText.'\b/', '<a href="'.$userUrl.'">'.$entityText.'</a>', $html, 1);
 		}
-			
+
 		return str_replace("\n", '<br />', $html);
 	}
 }
