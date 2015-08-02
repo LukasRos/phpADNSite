@@ -1,0 +1,8 @@
+<item>
+	<title>{{meta.title|e}}</title>
+	<description>{{post.html|e}}</description>
+	<pubDate>{{post.created_at|date('r')}}</pubDate>
+	<guid isPermaLink="true">{{site_url}}post/{{post.id}}</guid>
+	<link>{{site_url}}post/{{post.id}}</link>
+	{% for tag in post.tags %}<category>{{tag}}</category>{% endfor %}
+</item>

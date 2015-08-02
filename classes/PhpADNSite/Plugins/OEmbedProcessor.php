@@ -52,8 +52,15 @@ class OEmbedProcessor implements Plugin {
 					$post->setMetaField('img', $annotation['url']);
 				} else {
 					// include only thumbnail in stream
-					$post->setMetaField('img', isset($annotation['thumbnail_url'])
-						? $annotation['thumbnail_url'] : $annotation['url']);
+					if (isset($annotation['thumbnail_url'])) {
+						$post->setMetaField('img', $annotation['thumbnail_url']);
+						$post->setMetaField('img_full', $annotation['url']);
+					} else {
+						$post->setMetaField('img', $annotation['url']);
+					}
+				}
+				if (isset($annotation['title'])) {
+					$post->setMetaField('img_alt', $annotation['title']);
 				}
 			}
 		}

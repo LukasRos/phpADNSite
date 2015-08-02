@@ -1,0 +1,22 @@
+{% extends "layout.twig.html" %}
+
+{% block meta %}
+<link rel="alternate" type="application/rss+xml" href="{{site_url}}tagged/{{tag}}/rss" />
+{% endblock %}
+
+{% block content %}
+<div>
+	<h2 class="text-center">#{{tag}}</h2>
+</div>
+{% for p in posts %}
+<article class="h-entry">
+	{% include p.template with {'post':p.post, 'meta':p.meta} only %}
+	<p class="text-right">
+		{% if p.post.num_stars > 0 %}{{p.post.num_stars}} <span class="glyphicon glyphicon-star"></span> &#183;{% endif %}
+		{% if p.post.num_replies > 0 %}{{p.post.num_replies}} <span class="glyphicon glyphicon-comment"></span> &#183;{% endif %}
+		{% if p.post.num_reposts > 0 %}{{p.post.num_reposts}} <span class="glyphicon glyphicon-retweet"></span> &#183;{% endif %}
+		<time class="dt-published" datetime="{{p.post.created_at|date('Y-m-d H:i')}}">{{p.post.created_at|date('Y/m/d H:i')}}</time> &#183; <a href="/post/{{p.post.id}}" class="u-url">Permalink</a>
+	</p>
+</article>
+{% endfor %}
+{% endblock %}
