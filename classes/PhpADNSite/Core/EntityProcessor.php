@@ -23,23 +23,26 @@ class EntityProcessor {
 
 	public static function generateDefaultHTML($payload) {
 		$html = htmlentities($payload['text'], 0, 'UTF-8');
-		$tags = array();
 
 		// Process Hashtags
 		foreach ($payload['entities']['hashtags'] as $entity) {
 			$entityText = htmlentities(mb_substr($payload['text'], $entity['pos'], $entity['len'], 'UTF-8'), 0, 'UTF-8');
 			$html = preg_replace('/'.$entityText.'\b/', '<a itemprop="hashtag" data-hashtag-name="'.$entity['name'].'" rel="tag" href="/tagged/'.$entity['name'].'">'.$entityText.'</a>', $html, 1);
-			$tags[] = $entity['name'];
 		}
 
 		// Process Links
 		$processed = array();
 		foreach ($payload['entities']['links'] as $entity) {
 			$entityText = htmlentities(mb_substr($payload['text'], $entity['pos'], $entity['len']), 0, 'UTF-8');
+			$pos = $entity['pos']+$offset;
 			if (in_array($entityText, $processed)) continue;
 			$processed[] = $entityText;
-			$charAfterText = mb_substr($payload['text'], $entity['pos']+$entity['len'], 1);
-			$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>', $html);
+			if (isset($entity['amended_len'])) {
+				$amendment = ' ['.parse_url($entity['url'], PHP_URL_HOST).']';
+				$html = str_replace($entityText.$amendment, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>'.$amendment, $html);
+			} else {
+				$html = str_replace($entityText, '<a href="'.htmlspecialchars($entity['url']).'">'.$entityText.'</a>', $html);
+			}
 		}
 
 		// Process User Mentions
