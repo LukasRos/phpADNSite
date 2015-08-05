@@ -23,13 +23,25 @@
 				<meta property="schema:sameAs" content="https://alpha.app.net/{{user.username}}" />
 			</div>
 			{% endif %}
-			<div class="col-md-8">
+			<div class="col-md-8" id="top">
 				{% block content %}
 				{% endblock %}
-				<p class="text-center"><small>powered by <a href="https://join.app.net/">app.net</a> and <a href="https://github.com/LukasRos/phpADNSite">phpADNSite</a> &#183; default theme using <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://glyphicons.com/">Glyphicons</a></small></p>
 			</div>
 		</div>
 	</div>
+
+	<span id="top-link-block" class="hidden">
+    <a href="#top" class="well well-sm" onclick="$('html,body').animate({scrollTop:0},'slow');return false;">
+        <i class="glyphicon glyphicon-chevron-up"></i> Back to Top
+    </a>
+	</span><!-- /top-link-block -->
+
+	<footer class="footer">
+		<div class="footer-block">
+    	<p class="text-muted text-center"><small>powered by <a href="https://join.app.net/">app.net</a> and <a href="https://github.com/LukasRos/phpADNSite">phpADNSite</a> &#183; default theme using <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://glyphicons.com/">Glyphicons</a></small></p>
+  	</div>
+	</footer>
+
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 	<script src="/templates/bootstrap-sidebar-js/js/ekko-lightbox.js"></script>
@@ -78,5 +90,15 @@
                 });
             });
         </script>
+				<script>
+					// Only enable if the document has a long scroll bar
+					// Note the window height + offset
+					if ( ($(window).height() + 100) < $(document).height() ) {
+    				$('#top-link-block').removeClass('hidden').affix({
+        		// how far to scroll down before link "slides" into view
+        			offset: {top:100}
+    				});
+					}
+				</script>
 </body>
 </html>
