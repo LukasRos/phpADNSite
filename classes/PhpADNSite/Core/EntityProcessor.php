@@ -34,7 +34,6 @@ class EntityProcessor {
 		$processed = array();
 		foreach ($payload['entities']['links'] as $entity) {
 			$entityText = htmlentities(mb_substr($payload['text'], $entity['pos'], $entity['len']), 0, 'UTF-8');
-			$pos = $entity['pos']+$offset;
 			if (in_array($entityText, $processed)) continue;
 			$processed[] = $entityText;
 			if (isset($entity['amended_len'])) {
