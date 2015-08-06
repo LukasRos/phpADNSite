@@ -62,6 +62,18 @@ class OEmbedProcessor implements Plugin {
 				if (isset($annotation['title'])) {
 					$post->setMetaField('img_alt', $annotation['title']);
 				}
+				// remove link from post and set title
+				if (isset($annotation['embeddable_url'])) {
+					foreach ($post->getLinkEntities() as $link) {
+						if (str_replace('https:', 'http:', $link['url'])
+								== str_replace('https:', 'http:', $annotation['embeddable_url'])) {
+							$amendment = ' ['.parse_url($link['url'], PHP_URL_HOST).']';
+							$post->set('text', str_replace($link['text'].$amendment, '', $post->get('text')));
+							$post->setMetaField('img_alt', $link['text']);
+							break;
+						}
+					}
+				}
 			}
 		}
 	}
