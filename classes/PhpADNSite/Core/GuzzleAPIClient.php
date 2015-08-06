@@ -61,7 +61,7 @@ class GuzzleAPIClient implements APIClient {
 
 	public function retrievePostThread($id) {
 		$response = $this->client
-				->get('posts/'.$id.'/replies?include_deleted=0&include_annotations=1&include_html=0&include_starred_by=1&include_reposters=1&count=200')
+				->get('posts/'.$id.'/replies?include_deleted=1&include_annotations=1&include_html=0&include_starred_by=1&include_reposters=1&count=200')
 				->send()->json();
 		foreach ($response['data'] as $post) {
 			if ($post['id']==$id && $post['user']['username']!=$this->username) return null;

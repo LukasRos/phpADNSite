@@ -21,7 +21,8 @@ namespace PhpADNSite\Core;
 
 use Silex\Application, Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request, Symfony\Component\HttpFoundation\Response, Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException,
+	Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use PhpADNSite\Webmention\Handler;
 
 class Controller implements ControllerProviderInterface {
@@ -109,15 +110,15 @@ class Controller implements ControllerProviderInterface {
 	public function renderPermalinkPage($postId) {
 		$processor = new PostProcessor($this->config['plugins']);
 		$posts = $this->client->retrievePostThread($postId);
-		if (!$posts) throw new FileNotFoundException('/post/'.$postId);
+		if (!$posts) throw new NotFoundHttpException('/post/'.$postId);
 		$originalPost = null;
 		$postDirectReplies = array();
 		foreach ($posts as $post) {
 			if ($post->get('id')==$postId) $originalPost = $post;
 			else if ($post->get('reply_to')==$postId) $postDirectReplies[] = $post;
 		}
-
-		if (!$originalPost) throw new FileNotFoundException('/post/'.$postId);
+		if (!$originalPost) throw new NotFoundHttpException('/post/'.$postId);
+		if ($originalPost->get('is_deleted')==true) throw new GoneHttpException('/post/'.$postId);
 		$processor->add($originalPost);
 		foreach (array_reverse($postDirectReplies) as $p) $processor->add($p);
 		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate(View::PERMALINK));
