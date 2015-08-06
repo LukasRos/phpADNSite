@@ -1,0 +1,6 @@
+<p style="display:none;"><a rel="author" class="p-author h-card" href="/"><span class="p-name">{{post.user.name}}</span><img src="{{post.user.avatar_image.url}}" class="u-photo" /></a></p>
+<p class="lead e-content" property="schema:articleBody">
+{% if meta.external_reaction_type == 'like' %}
+I liked a post:<br /><a class="u-like-of" href="{{meta.external_target_url}}">{{meta.external_target_name}}</a>
+{% endif %}
+</p>

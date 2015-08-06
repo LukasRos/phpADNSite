@@ -25,7 +25,8 @@ return array(
 		//'PhpADNSite\Plugins\ReplyAndDirectedPostHider',
 		//'PhpADNSite\Plugins\LongPostsPlugin',
 		//'PhpADNSite\Plugins\OEmbedProcessor',
-		//'PhpADNSite\Plugins\WebmentionPlugin'
+		//'PhpADNSite\Plugins\WebmentionPlugin',
+		//'PhpADNSite\Plugins\ReactionPlugin'
 	),
 	// The API backend; typically this should NOT be changed unless you want to use an API proxy
 	'backend' => array(
