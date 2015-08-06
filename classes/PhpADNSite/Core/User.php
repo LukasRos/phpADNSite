@@ -23,10 +23,10 @@ namespace PhpADNSite\Core;
  * Class for a user.
  */
 class User {
-	
+
 	private $payload;
 	private $meta = array();
-	
+
 	public function __construct(array $payload) {
 		foreach ($payload as $key => $value) {
 			switch ($key) {
@@ -37,28 +37,28 @@ class User {
 		}
 		$this->payload = $payload;
 	}
-	
+
 	/**
-	 * Returns the full post payload as an array in the format specified and returned by the app.net API.  
+	 * Returns the full post payload as an array in the format specified and returned by the app.net API.
 	 */
 	public function getPayload() {
 		return $this->payload;
 	}
-	
+
 	/**
 	 * Check if a payload field exists.
 	 */
 	public function has($key) {
 		return isset($this->payload[$key]);
 	}
-	
+
 	/**
 	 * Return a single field from the post payload.
 	 */
 	public function get($key) {
 		return @$this->payload[$key];
 	}
-	
+
 	/**
 	 * Update a single field in the post payload.
 	 */
@@ -66,7 +66,7 @@ class User {
 		$this->payload[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Set the payload of the post. Plugins can use this method to modify the content.
 	 */
@@ -74,21 +74,21 @@ class User {
 		$this->payload = $payload;
 		return $this;
 	}
-	
+
 	/**
 	 * Check if a meta field exists. Plugins can retrieve meta fields created by prior plugins in the chain.
 	 */
 	public function hasMetaField($key) {
 		return isset($this->meta[$key]);
 	}
-	
+
 	/**
 	 * Get a meta field. Plugins can retrieve meta fields created by prior plugins in the chain.
 	 */
 	public function getMetaField($key) {
 		return @$this->meta[$key];
 	}
-	
+
 	/**
 	 * Set a meta field. Plugins can specify meta fields for communicating with plugins further down the chain.
 	 */
@@ -96,14 +96,14 @@ class User {
 		$this->meta[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Return all meta fields as array.
 	 */
 	public function getAllMetaFields() {
 		return $this->meta;
 	}
-	
+
 	/**
 	 * Checks whether this post has at least one annotation with the given type.
 	 * @param string $annotationType The annotation type, typically a reverse-hostname string
@@ -116,7 +116,7 @@ class User {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns the value of the first annotation with the given type.
 	 * @param string $annotationType The annotation type, typically a reverse-hostname string
@@ -129,7 +129,7 @@ class User {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the values of all annotations with the given type.
 	 * @param string $annotationType The annotation type, typically a reverse-hostname string
@@ -143,22 +143,33 @@ class User {
 		}
 		return $annotations;
 	}
-	
+
 	/**
 	 * Add an annotation to the user.
 	 * @param string $annotationType The annotation type, typically a reverse-hostname string
 	 * @param array $annotationValue The annotation value, must be an associative array.
 	 */
 	public function addAnnotation($annotationType, array $annotationValue) {
-		if (!isset($this->payload['annotations'])) $this->payload['annotations'] = array();
-		$this->payload['annotations'][] = array(
-			'type' => $annotationType,
-			'value' => $annotationValue
-		);
+		if ($this->hasAnnotation($annotationType)) {
+			// Update existing annotation
+			for ($i = 0; $i < count($this->payload['annotations']); $i++) {
+				if ($this->payload['annotations'][$i]['type']==$annotationType) {
+					$this->payload['annotations'][$i]['value'] = $annotationValue;
+					break;
+				}
+			}
+		} else {
+			// Add new annotation
+			if (!isset($this->payload['annotations'])) $this->payload['annotations'] = array();
+			$this->payload['annotations'][] = array(
+				'type' => $annotationType,
+				'value' => $annotationValue
+			);
+		}
 	}
-	
+
 	/**
-	 * Returns a filtered amount of payload fields required for rendering a post. 
+	 * Returns a filtered amount of payload fields required for rendering a post.
 	 */
 	public function getPayloadForTemplate() {
 		$fields = array('id', 'created_at', 'username', 'name', 'description', 'avatar_image', 'canonical_url', 'counts');
@@ -168,7 +179,7 @@ class User {
 		}
 		return $output;
 	}
-	
+
 	/**
 	 * Returns a filtered amount of payload fields required for updating the profile.
 	 */
