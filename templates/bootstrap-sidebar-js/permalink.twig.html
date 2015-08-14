@@ -1,5 +1,12 @@
 {% extends "layout.twig.html" %}
 
+{% block meta %}
+<meta property="og:title" content="{{posts[0].meta.title}}" />
+<meta property="og:type" content="article" />
+<meta property="og:description" content="{% if posts[0].meta.description %}{{posts[0].meta.description|e}}{% else %}{{posts[0].post.text|e}}{% endif %}" />
+<meta property="og:url" content="{{site_url}}post/{{posts[0].post.id}}" />
+{% endblock %}
+
 {% block title %}
   {% if posts[0].meta.title %}{{posts[0].meta.title}} - {% endif %}
 {% endblock %}

@@ -49,10 +49,10 @@ class LongPostsPlugin implements Plugin {
 				$post->setMetaField('title', $annotation['title']);
 				$post->setMetaField('truncated', false);
 
+				$bodyLines = explode("\n", $annotation['body']);
 				if ($viewType==View::PERMALINK) {
 					$body = $annotation['body'];
 				} else {
-					$bodyLines = explode("\n", $annotation['body']);
 					$body = '';
 
 					$i = 0;
@@ -68,6 +68,7 @@ class LongPostsPlugin implements Plugin {
 					}
 				}
 				$post->set('html', Markdown::defaultTransform($body));
+				$post->setMetaField('description', $bodyLines[0]);
 
 				// Do not handle other annotations
 				$post->stopProcessing();

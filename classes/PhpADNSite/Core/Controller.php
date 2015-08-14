@@ -21,7 +21,8 @@ namespace PhpADNSite\Core;
 
 use Silex\Application, Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request, Symfony\Component\HttpFoundation\Response, Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException,
+	Symfony\Component\HttpKernel\Exception\GoneHttpException;
 use PhpADNSite\Webmention\Handler;
 
 class Controller implements ControllerProviderInterface {
@@ -30,10 +31,11 @@ class Controller implements ControllerProviderInterface {
 	private $twig;
 	private $config;
 	private $domain;
+	private $scheme;
 
 	public function generateResponse($template, $postData, $customPageVars = array()) {
 		return $this->twig->render($template, array_merge($postData, array(
-			'site_url' => 'http://'.$this->domain.'/',
+			'site_url' => $this->scheme.'://'.$this->domain.'/',
 			'vars' => isset($this->config['domains'][$this->domain])
 				? $this->config['domains'][$this->domain]['theme_config']['variables']
 				: $this->config['domains']['*']['theme_config']['variables']
@@ -109,15 +111,15 @@ class Controller implements ControllerProviderInterface {
 	public function renderPermalinkPage($postId) {
 		$processor = new PostProcessor($this->config['plugins']);
 		$posts = $this->client->retrievePostThread($postId);
-		if (!$posts) throw new FileNotFoundException('/post/'.$postId);
+		if (!$posts) throw new NotFoundHttpException('/post/'.$postId);
 		$originalPost = null;
 		$postDirectReplies = array();
 		foreach ($posts as $post) {
 			if ($post->get('id')==$postId) $originalPost = $post;
 			else if ($post->get('reply_to')==$postId) $postDirectReplies[] = $post;
 		}
-
-		if (!$originalPost) throw new FileNotFoundException('/post/'.$postId);
+		if (!$originalPost) throw new NotFoundHttpException('/post/'.$postId);
+		if ($originalPost->get('is_deleted')==true) throw new GoneHttpException('/post/'.$postId);
 		$processor->add($originalPost);
 		foreach (array_reverse($postDirectReplies) as $p) $processor->add($p);
 		return $this->generateResponse('permalink.twig.html', $processor->renderForTemplate(View::PERMALINK));
@@ -175,19 +177,19 @@ class Controller implements ControllerProviderInterface {
 		$user = $this->client->retrieveUser();
 		if ($user->hasAnnotation('net.lukasrosenstock.federatedprofile')
 				&& ($value = $user->getAnnotationValue('net.lukasrosenstock.federatedprofile'))
-				&& $value['profile_url']=='http://'.$this->domain.'/') {
+				&& $value['profile_url']==$this->scheme.'://'.$this->domain.'/') {
 			$message = 'The domain <'.$this->domain.'> is already configured for app.net federation.';
 		} else {
 			if (strpos($this->domain, '.')===false) {
 				$message = 'The domain <'.$this->domain.'> is a local domain and can not be configured for federation.';
 			} else {
 				$user->addAnnotation('net.lukasrosenstock.federatedprofile', array(
-					'profile_url' => 'http://'.$this->domain.'/',
-					'post_url_template' => 'http://'.$this->domain.'/post/{id}'
+					'profile_url' => $this->scheme.'://'.$this->domain.'/',
+					'post_url_template' => $this->scheme.'://'.$this->domain.'/post/{id}'
 				));
 				try {
 					$this->client->updateUser($user);
-					$message = 'The user profile has now been configured to use the domain <'.$this->domain.'> for app.net federation.';
+					$message = 'The user profile has now been configured to use the domain <'.$this->domain.'> for app.net federation with "'.$this->scheme.'".';
 				} catch (\Exception $e) {
 					$message = 'The user profile could not be updated! Are you using a valid access token?!';
 				}
@@ -216,6 +218,10 @@ class Controller implements ControllerProviderInterface {
 		$controller = $this;
 
 		$controllers->before(function(Request $r) use ($app, $controller) {
+			// Trust all proxies
+			$r->setTrustedProxies(array($r->getClientIp()));
+
+			$controller->scheme = $r->getScheme();
 			$controller->initializeWithDomain($r->getHost());
 		});
 

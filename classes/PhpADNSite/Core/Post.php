@@ -91,6 +91,30 @@ class Post {
 	}
 
 	/**
+	 * Get mention entities.
+	 * @return array
+	 */
+	public function getMentionEntities() {
+		return $this->payload['entities']['mentions'];
+	}
+	
+	/**
+	 * Get hashtag entities.
+	 * @return array
+	 */
+	public function getHashtagEntities() {
+		return $this->payload['entities']['hashtags'];
+	}
+
+	/**
+	 * Get link entities.
+	 * @return array
+	 */
+	public function getLinkEntities() {
+		return $this->payload['entities']['links'];
+	}
+
+	/**
 	 * Check if a meta field exists. Plugins can retrieve meta fields created by prior plugins in the chain.
 	 */
 	public function hasMetaField($key) {
