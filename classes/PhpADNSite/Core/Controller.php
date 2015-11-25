@@ -135,7 +135,7 @@ class Controller implements ControllerProviderInterface {
 		foreach ($page as $post) $processor->add($post);
 		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM), array(
 				'pagination' => array(
-						'older' => $page->getMinID(),
+						'older' => ($id > 1) ? $page->getMinID() : null,
 						'newer' =>  ($page->hasMore()) ? $page->getMaxID() : null
 				)
 		));
@@ -155,7 +155,8 @@ class Controller implements ControllerProviderInterface {
 		$postDirectReplies = array();
 		foreach ($posts as $post) {
 			if ($post->get('id')==$postId) $originalPost = $post;
-			else if ($post->get('reply_to')==$postId) $postDirectReplies[] = $post;
+			else if ($post->get('reply_to')==$postId
+				&& $post->get('is_deleted')!=true) $postDirectReplies[] = $post;
 		}
 		if (!$originalPost) throw new NotFoundHttpException('/post/'.$postId);
 		if ($originalPost->get('is_deleted')==true) throw new GoneHttpException('/post/'.$postId);
