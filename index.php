@@ -17,6 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+date_default_timezone_set('UTC');
+
 require_once "vendor/autoload.php";
 $config = require "config.php";
 

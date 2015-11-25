@@ -28,6 +28,10 @@ return array(
 		//'PhpADNSite\Plugins\WebmentionPlugin',
 		//'PhpADNSite\Plugins\ReactionPlugin'
 	),
+	// Filtered Views that are made available on the site
+	'views' => array(
+		//'PhpADNSite\FilteredViews\TopPostsView'
+	),
 	// The API backend; typically this should NOT be changed unless you want to use an API proxy
 	'backend' => array(
 		'class' => 'PhpADNSite\Core\GuzzleAPIClient',

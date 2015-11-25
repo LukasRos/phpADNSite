@@ -23,44 +23,53 @@ namespace PhpADNSite\Core;
  * Class that contains a page of posts.
  */
 class PostPage implements \Iterator {
-	
+
 	private $meta;
 	private $posts = array();
 	private $id = 0;
-	
-	public function __construct(array $apiResponse) {
-		$this->meta = $apiResponse['meta'];
-		foreach ($apiResponse['data'] as $p) $this->posts[] = new Post($p);
+
+	public function __construct(array $apiResponse = array()) {
+		$this->meta = isset($apiResponse['meta']) ? $apiResponse['meta'] : array();
+		if (isset($apiResponse['data'])) {
+			foreach ($apiResponse['data'] as $p)
+				$this->posts[] = new Post($p);
+		} else {
+			$this->posts = array();
+		}
 	}
-	
+
+	public function add(Post $post) {
+		$this->posts[] = $post;
+	}
+
 	public function current() {
 		return $this->posts[$this->id];
 	}
-	
+
 	public function key() {
 		return $this->id;
 	}
-	
+
 	public function next() {
 		$this->id++;
 	}
-	
+
 	public function rewind() {
 		$this->id = 0;
 	}
-	
+
 	public function valid() {
 		return ($this->id<count($this->posts));
 	}
-		
+
 	public function getMaxID() {
 		return $this->meta['max_id'];
 	}
-	
+
 	public function getMinID() {
 		return $this->meta['min_id'];
 	}
-	
+
 	public function hasMore() {
 		return isset($this->meta['more']) && $this->meta['more'];
 	}

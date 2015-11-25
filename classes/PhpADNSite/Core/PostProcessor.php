@@ -26,7 +26,7 @@ class PostProcessor {
 
 	public function __construct(array $plugins) {
 		foreach ($plugins as $plugin) {
-			if (!in_array('PhpADNSite\Core\Plugin',class_implements($plugin))) throw new \Exception("The plugin class <".$plugin."> does not implement the expected interface.");
+			if (!in_array('PhpADNSite\Core\Plugin', class_implements($plugin))) throw new \Exception("The plugin class <".$plugin."> does not implement the expected interface.");
 			$this->plugins[] = new $plugin;
 		}
 	}

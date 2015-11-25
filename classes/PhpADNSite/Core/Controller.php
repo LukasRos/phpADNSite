@@ -30,15 +30,22 @@ class Controller implements ControllerProviderInterface {
 	private $client;
 	private $twig;
 	private $config;
+	private $views = array();
 	private $domain;
 	private $scheme;
 
 	public function generateResponse($template, $postData, $customPageVars = array()) {
+		$views = array();
+		foreach ($this->views as $v) $views[] = array(
+			'path' => $v->getURLPath(),
+			'name' => $v->getDisplayName()
+		);
 		return $this->twig->render($template, array_merge($postData, array(
 			'site_url' => $this->scheme.'://'.$this->domain.'/',
 			'vars' => isset($this->config['domains'][$this->domain])
 				? $this->config['domains'][$this->domain]['theme_config']['variables']
-				: $this->config['domains']['*']['theme_config']['variables']
+				: $this->config['domains']['*']['theme_config']['variables'],
+			'views' => $views
 		), $customPageVars));
 	}
 
@@ -63,6 +70,11 @@ class Controller implements ControllerProviderInterface {
 				new \Twig_Loader_Filesystem(__DIR__.'/../../../templates/'.$domainConfig['theme_config']['name']),
 				array('cache' => null, 'autoescape' => false));
 
+		// Set up filtered views
+		foreach ($this->config['views'] as $view) {
+			if (!in_array('PhpADNSite\Core\FilteredView', class_implements($view))) throw new \Exception("The view class <".$view."> does not implement the expected interface.");
+			$this->views[] = new $view;
+		}
 
 		return true;
 	}
@@ -72,6 +84,23 @@ class Controller implements ControllerProviderInterface {
 		$page = $this->client->retrieveRecentPosts();
 		foreach ($page as $post) $processor->add($post);
 		return $this->generateResponse('posts.twig.html', $processor->renderForTemplate(View::STREAM), array(
+			'pagination' => array(
+				'older' => ($page->hasMore()) ? $page->getMinID() : null
+			)
+		));
+	}
+
+	public function renderFilteredViewPosts($filteredView) {
+		foreach ($this->views as $v) {
+			if ($v->getURLPath()==$filteredView) $viewHandler = $v;
+		}
+		if (!isset($viewHandler)) throw new NotFoundHttpException('/'.$filteredView);
+		$processor = new PostProcessor($this->config['plugins']);
+		$page = $viewHandler->getPostPage($this->client);
+		foreach ($page as $post) $processor->add($post);
+		$template = $viewHandler->getTemplateFilename()
+		 	? $viewHandler->getTemplateFilename() : 'posts.twig.html';
+		return $this->generateResponse($template, $processor->renderForTemplate(View::STREAM), array(
 			'pagination' => array(
 				'older' => ($page->hasMore()) ? $page->getMinID() : null
 			)
@@ -287,6 +316,11 @@ class Controller implements ControllerProviderInterface {
 		$controllers->post('/webmention', function(Request $r) use ($controller) {
 			// Handle incoming webmentions
 			return Handler::handleWebmention($r, $this->domain, $this->client);
+		});
+
+		$controllers->get('/{filteredView}', function($filteredView) use ($controller) {
+			// Return a filtered view of posts
+			return $controller->renderFilteredViewPosts($filteredView);
 		});
 
 		return $controllers;
