@@ -7,6 +7,9 @@
 	<link rel="stylesheet" href="/templates/bootstrap-sidebar-js/css/ekko-lightbox.css" />
 	<link rel="stylesheet" href="/templates/bootstrap-sidebar-js/css/style.css" />
 	{% block meta %}{% endblock %}
+	{% for link in links %}
+	<link rel="{{link.rel}}" href="{{link.href}}" />
+	{% endfor %}
 	<link rel="me" href="https://alpha.app.net/{{user.username}}" />
 	<link rel="webmention" href="{{site_url}}webmention" />
 

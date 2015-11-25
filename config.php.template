@@ -17,6 +17,13 @@ return array(
 							'name' => 'bootstrap-default',
 							// Optional variables specified by the theme (the standard theme has none)
 							'variables' => array()
+					),
+					// Custom links for the HTML head
+					'links' => array(
+						array(
+							'rel' => '',
+							'href' => ''
+						)
 					)
 			)
 	),
