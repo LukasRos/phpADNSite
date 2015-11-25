@@ -23,11 +23,11 @@ use Michelf\Markdown;
 use PhpADNSite\Core\View, PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
 
 /**
- * The "LongPostsPlugin" displays the full content of long-form postings that
+ * The "LongpostsPlugin" displays the full content of long-form postings that
  * use the net.jazzychad.adnblog.post annotation. It does so by using a custom
  * template.
  */
-class LongPostsPlugin implements Plugin {
+class LongpostsPlugin implements Plugin {
 
 	const ANNOTATION_TYPE = 'net.jazzychad.adnblog.post';
 	const TRUNCATED_PARAGRAPH_COUNT = 2;

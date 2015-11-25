@@ -34,7 +34,7 @@ interface APIClient {
 	/**
 	 * Retrieve the recent posts from the user.
 	 */
-	public function retrieveRecentPosts();
+	public function retrieveRecentPosts($count);
 
 	/**
 	 * Retrieve a single post by its ID.

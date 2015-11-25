@@ -26,7 +26,7 @@ class PostProcessor {
 
 	public function __construct(array $plugins) {
 		foreach ($plugins as $plugin) {
-			if (!in_array('PhpADNSite\Core\Plugin',class_implements($plugin))) throw new \Exception("The plugin class <".$plugin."> does not implement the expected interface.");
+			if (!in_array('PhpADNSite\Core\Plugin', class_implements($plugin))) throw new \Exception("The plugin class <".$plugin."> does not implement the expected interface.");
 			$this->plugins[] = new $plugin;
 		}
 	}
@@ -60,6 +60,9 @@ class PostProcessor {
 		foreach ($this->posts as $post) {
 			if (!$user) {
 				$user = $post->get('user');
+
+				date_default_timezone_set($user->get('timezone'));
+
 				$user->set('description', array_merge(
 					$user->get('description'),
 					array('html' => EntityProcessor::generateDefaultHTML($user->get('description')))
