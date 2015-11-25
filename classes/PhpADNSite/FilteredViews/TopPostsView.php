@@ -29,7 +29,7 @@ class TopPostsView implements FilteredView {
 	public function getURLPath() {
 		return "top";
 	}
-	
+
 	public function getDisplayName() {
     return "Top Posts";
   }
@@ -64,11 +64,11 @@ class TopPostsView implements FilteredView {
     });
 
     // Use only top 10 posts
-    $top5Posts = new PostPage();
+    $top10Posts = new PostPage();
     for ($i = 1; $i <= 10; $i++)
-      if (isset($topPosts[$i])) $top5Posts->add($topPosts[$i]);
+      if (isset($topPosts[$i])) $top10Posts->add($topPosts[$i]);
 
-    return $top5Posts;
+    return $top10Posts;
   }
 
 }
