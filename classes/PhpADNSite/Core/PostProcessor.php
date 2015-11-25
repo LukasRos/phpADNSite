@@ -60,6 +60,9 @@ class PostProcessor {
 		foreach ($this->posts as $post) {
 			if (!$user) {
 				$user = $post->get('user');
+
+				date_default_timezone_set($user->get('timezone'));
+
 				$user->set('description', array_merge(
 					$user->get('description'),
 					array('html' => EntityProcessor::generateDefaultHTML($user->get('description')))
