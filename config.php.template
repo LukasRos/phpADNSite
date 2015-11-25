@@ -30,14 +30,15 @@ return array(
 	// Chain of plugin class names; plugins are executed in the order in which they are specified here
 	'plugins' => array(
 		//'PhpADNSite\Plugins\ReplyAndDirectedPostHider',
-		//'PhpADNSite\Plugins\LongPostsPlugin',
+		//'PhpADNSite\Plugins\LongpostsPlugin',
 		//'PhpADNSite\Plugins\OEmbedProcessor',
 		//'PhpADNSite\Plugins\WebmentionPlugin',
 		//'PhpADNSite\Plugins\ReactionPlugin'
 	),
 	// Filtered Views that are made available on the site
 	'views' => array(
-		//'PhpADNSite\FilteredViews\TopPostsView'
+		//'PhpADNSite\FilteredViews\TopPostsView',
+		//'PhpADNSite\FilteredViews\LongpostsView'
 	),
 	// The API backend; typically this should NOT be changed unless you want to use an API proxy
 	'backend' => array(
