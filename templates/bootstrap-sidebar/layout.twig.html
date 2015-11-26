@@ -9,6 +9,9 @@
 	{% for link in links %}
 	<link rel="{{link.rel}}" href="{{link.href}}" />
 	{% endfor %}
+	{% for m in meta %}
+	<meta name="{{m.name}}" content="{{m.content}}" />
+	{% endfor %}
 	<link rel="me" href="https://alpha.app.net/{{user.username}}" />
 	<link rel="webmention" href="{{site_url}}webmention" />
 </head>

@@ -40,22 +40,34 @@ class Controller implements ControllerProviderInterface {
 			'path' => $v->getURLPath(),
 			'name' => $v->getDisplayName()
 		);
-		$linksConfig = isset($this->config['domains'][$this->domain])
-			? $this->config['domains'][$this->domain]['links']
-			: $this->config['domains']['*']['links'];
+		$domainConfig = isset($this->config['domains'][$this->domain])
+			? $this->config['domains'][$this->domain]
+			: $this->config['domains']['*'];
+
 		$links = array();
-		foreach ($linksConfig as $link) {
-			if (isset($link['rel']) && isset($link['href'])
-				&& trim($link['rel'])!='' && trim($link['href'])!='')
-			$links[] = $link;
+		$meta = array();
+		if (isset($domainConfig['links'])) {
+			// Add links from config file to template
+			foreach ($domainConfig['links'] as $link) {
+				if (isset($link['rel']) && isset($link['href'])
+					&& trim($link['rel'])!='' && trim($link['href'])!='')
+				$links[] = $link;
+			}
+		}
+		if (isset($domainConfig['meta'])) {
+			// Add meta tags from config file to template
+			foreach ($domainConfig['meta'] as $m) {
+				if (isset($m['name']) && isset($m['content'])
+						&& trim($m['name'])!='' && trim($m['content']!=''))
+					$meta[] = $m;
+			}
 		}
 		return $this->twig->render($template, array_merge($postData, array(
 			'site_url' => $this->scheme.'://'.$this->domain.'/',
-			'vars' => isset($this->config['domains'][$this->domain])
-				? $this->config['domains'][$this->domain]['theme_config']['variables']
-				: $this->config['domains']['*']['theme_config']['variables'],
+			'vars' => $domainConfig['theme_config']['variables'],
 			'views' => $views,
-			'links' => $links
+			'links' => $links,
+			'meta' => $meta
 		), $customPageVars));
 	}
 

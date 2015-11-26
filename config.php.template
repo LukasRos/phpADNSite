@@ -24,6 +24,12 @@ return array(
 							'rel' => '',
 							'href' => ''
 						)
+					),
+					'meta' => array(
+						array(
+							'name' => '',
+							'content' => ''
+						)
 					)
 			)
 	),
