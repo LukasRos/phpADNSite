@@ -21,6 +21,12 @@ $site_parameters = array(
 			'rel' => '',
 			'href' => ''
 		)
+	),
+	'meta' => array(
+		array(
+			'name' => '',
+			'content' => ''
+		)
 	)
 );
 
