@@ -46,6 +46,10 @@ class OEmbedProcessor implements Plugin {
 			if (!$originalPost->hasAnnotation(self::ANNOTATION_TYPE)) continue;
 
 			$annotation = $originalPost->getAnnotationValue(self::ANNOTATION_TYPE);
+			if ($annotation['type']=='rich' || $annotation['type']=='video') {
+				// Rich or video annotation -> embed HTML
+				$post->setMetaField('embed_html', $annotation['html']);
+			} else
 			if ($annotation['type']=='photo') {
 				if ($viewType==View::PERMALINK) {
 					// include full image in permalink pages
