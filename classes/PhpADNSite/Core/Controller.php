@@ -190,7 +190,7 @@ class Controller implements ControllerProviderInterface {
 			if ($post->get('is_deleted')!=true) $taggedPosts[] = $post;
 		};
 		if (!$taggedPosts) throw new GoneHttpException('/tagged/'.$tag);
-		foreach (array_reverse($taggedPosts) as $p) $processor->add($p);
+		foreach ($taggedPosts as $p) $processor->add($p);
 		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
 	}
 
