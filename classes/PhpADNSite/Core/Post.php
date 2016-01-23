@@ -97,7 +97,7 @@ class Post {
 	public function getMentionEntities() {
 		return $this->payload['entities']['mentions'];
 	}
-	
+
 	/**
 	 * Get hashtag entities.
 	 * @return array
@@ -226,6 +226,30 @@ class Post {
 			}
 		}
 		return $annotations;
+	}
+
+	/**
+	 * Add an annotation to the post.
+	 * @param string $annotationType The annotation type, typically a reverse-hostname string
+	 * @param array $annotationValue The annotation value, must be an associative array.
+	 */
+	public function addAnnotation($annotationType, array $annotationValue) {
+		if ($this->hasAnnotation($annotationType)) {
+			// Update existing annotation
+			for ($i = 0; $i < count($this->payload['annotations']); $i++) {
+				if ($this->payload['annotations'][$i]['type']==$annotationType) {
+					$this->payload['annotations'][$i]['value'] = $annotationValue;
+					break;
+				}
+			}
+		} else {
+			// Add new annotation
+			if (!isset($this->payload['annotations'])) $this->payload['annotations'] = array();
+			$this->payload['annotations'][] = array(
+				'type' => $annotationType,
+				'value' => $annotationValue
+			);
+		}
 	}
 
 	/**
