@@ -1,7 +1,7 @@
 <?php
 
 /*  phpADNSite
- Copyright (C) 2014 Lukas Rosenstock
+ Copyright (C) 2014-2016 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -26,13 +26,13 @@ use PhpADNSite\Core\View, PhpADNSite\Core\Post, PhpADNSite\Core\Plugin;
  * threads or are directed (@). This is useful to keep a page clean of segments of conversations.
  */
 class ReplyAndDirectedPostHider implements Plugin {
-	
+
 	private $posts = array();
-	
+
 	public function add(Post $post) {
 		$this->posts[] = $post;
 	}
-	
+
 	public function processAll($viewType) {
 		if ($viewType!=View::PERMALINK) {
 			foreach ($this->posts as $post) {
@@ -41,4 +41,9 @@ class ReplyAndDirectedPostHider implements Plugin {
 			}
 		}
 	}
+
+  public function configure($configuration) {
+    // nothing to do, this plugin does not have any configuration
+  }
+
 }

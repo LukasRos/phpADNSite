@@ -1,7 +1,7 @@
 <?php
 
 /*  phpADNSite
- Copyright (C) 2014-2015 Lukas Rosenstock
+ Copyright (C) 2014-2016 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -75,4 +75,8 @@ class LongpostsPlugin implements Plugin {
 			}
 		}
 	}
+
+  public function configure($configuration) {
+    // nothing to do, this plugin does not have any configuration
+  }
 }

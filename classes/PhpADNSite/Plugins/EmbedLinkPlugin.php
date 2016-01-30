@@ -84,4 +84,8 @@ class EmbedLinkPlugin implements Plugin {
       }
     }
 	}
+
+  public function configure($configuration) {
+    // nothing to do, this plugin does not have any configuration
+  }
 }
