@@ -24,6 +24,7 @@ namespace PhpADNSite\Core;
  */
 class Post {
 
+	private $originalPayload;
 	private $payload;
 	private $meta = array();
 	private $template = 'post.twig.html';
@@ -31,6 +32,8 @@ class Post {
 	private $stopProcessing = false;
 
 	public function __construct(array $payload) {
+		$this->originalPayload = $payload;
+
 		foreach ($payload as $key => $value) {
 			switch ($key) {
 				case "created_at":
@@ -295,4 +298,13 @@ class Post {
 
 		return $output;
 	}
+
+	/**
+	 * Returns the post exactly as it was fetched from the app.net API.
+	 * @return array
+	 */
+	public function getOriginalPayload() {
+		return $this->originalPayload;
+	}
+
 }
