@@ -24,10 +24,12 @@ namespace PhpADNSite\Core;
  */
 class User {
 
+	private $originalPayload;
 	private $payload;
 	private $meta = array();
 
 	public function __construct(array $payload) {
+		$this->originalPayload = $payload;
 		foreach ($payload as $key => $value) {
 			switch ($key) {
 				case "created_at":
@@ -187,5 +189,13 @@ class User {
 		$output = $this->payload;
 		unset($output['description']['entities']);
 		return $output;
+	}
+
+	/**
+	 * Returns the user exactly as it was fetched from the app.net API.
+	 * @return array
+	 */
+	public function getOriginalPayload() {
+		return $this->originalPayload;
 	}
 }

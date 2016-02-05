@@ -1,7 +1,7 @@
 <?php
 
 /*  phpADNSite
- Copyright (C) 2014 Lukas Rosenstock
+ Copyright (C) 2014-2016 Lukas Rosenstock
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -26,8 +26,20 @@ class PostProcessor {
 
 	public function __construct(array $plugins) {
 		foreach ($plugins as $plugin) {
-			if (!in_array('PhpADNSite\Core\Plugin', class_implements($plugin))) throw new \Exception("The plugin class <".$plugin."> does not implement the expected interface.");
-			$this->plugins[] = new $plugin;
+			if (is_string($plugin)) {
+				if (!in_array('PhpADNSite\Core\Plugin', class_implements($plugin)))
+					throw new \Exception("The plugin class <".$plugin."> does not implement the expected interface.");
+				$this->plugins[] = new $plugin;
+			} else
+			if (is_array($plugin) && isset($plugin['class'])) {
+				if (!in_array('PhpADNSite\Core\Plugin', class_implements($plugin['class'])))
+					throw new \Exception("The plugin class <".$plugin['class']."> does not implement the expected interface.");
+				$pluginInstance = new $plugin['class'];
+				if (isset($plugin['config']))
+					$pluginInstance->configure($plugin['config']);
+				$this->plugins[] = $pluginInstance;
+			} else
+				throw new \Exception("The plugin configuration cannot be parsed.");
 		}
 	}
 

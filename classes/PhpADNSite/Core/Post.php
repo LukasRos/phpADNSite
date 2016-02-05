@@ -24,6 +24,7 @@ namespace PhpADNSite\Core;
  */
 class Post {
 
+	private $originalPayload;
 	private $payload;
 	private $meta = array();
 	private $template = 'post.twig.html';
@@ -31,6 +32,8 @@ class Post {
 	private $stopProcessing = false;
 
 	public function __construct(array $payload) {
+		$this->originalPayload = $payload;
+
 		foreach ($payload as $key => $value) {
 			switch ($key) {
 				case "created_at":
@@ -97,7 +100,7 @@ class Post {
 	public function getMentionEntities() {
 		return $this->payload['entities']['mentions'];
 	}
-	
+
 	/**
 	 * Get hashtag entities.
 	 * @return array
@@ -229,6 +232,30 @@ class Post {
 	}
 
 	/**
+	 * Add an annotation to the post.
+	 * @param string $annotationType The annotation type, typically a reverse-hostname string
+	 * @param array $annotationValue The annotation value, must be an associative array.
+	 */
+	public function addAnnotation($annotationType, array $annotationValue) {
+		if ($this->hasAnnotation($annotationType)) {
+			// Update existing annotation
+			for ($i = 0; $i < count($this->payload['annotations']); $i++) {
+				if ($this->payload['annotations'][$i]['type']==$annotationType) {
+					$this->payload['annotations'][$i]['value'] = $annotationValue;
+					break;
+				}
+			}
+		} else {
+			// Add new annotation
+			if (!isset($this->payload['annotations'])) $this->payload['annotations'] = array();
+			$this->payload['annotations'][] = array(
+				'type' => $annotationType,
+				'value' => $annotationValue
+			);
+		}
+	}
+
+	/**
 	 * Indicates whether this post is a repost of another post.
 	 */
 	public function isRepost() {
@@ -271,4 +298,13 @@ class Post {
 
 		return $output;
 	}
+
+	/**
+	 * Returns the post exactly as it was fetched from the app.net API.
+	 * @return array
+	 */
+	public function getOriginalPayload() {
+		return $this->originalPayload;
+	}
+
 }
