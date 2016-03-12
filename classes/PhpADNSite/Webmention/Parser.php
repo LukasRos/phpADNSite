@@ -33,6 +33,9 @@ class Parser {
     if (isset($entry['in-reply-to'])) {
       // Reply
       foreach ($entry['in-reply-to'] as $r) {
+        if (is_string($r) && $r==$ownUrl)
+          return new ExternalPost(ExternalPost::TYPE_REPLY, $extUrl, self::parseAuthor($entry));
+
         if (is_array($r) && isset($r['properties'])
             && isset($r['properties']['url']) && isset($r['properties']['url'])==$ownUrl)
           return new ExternalPost(ExternalPost::TYPE_REPLY, $extUrl, self::parseAuthor($entry));
@@ -41,13 +44,15 @@ class Parser {
     if (isset($entry['like-of'])) {
       // Like
       foreach ($entry['like-of'] as $r) {
-        if (is_string($r) && $r==$ownUrl) return new ExternalPost(ExternalPost::TYPE_LIKE, $extUrl, self::parseAuthor($entry));
+        if (is_string($r) && $r==$ownUrl)
+          return new ExternalPost(ExternalPost::TYPE_LIKE, $extUrl, self::parseAuthor($entry));
+
         if (is_array($r) && isset($r['properties'])
             && isset($r['properties']['url']) && isset($r['properties']['url'])==$ownUrl)
           return new ExternalPost(ExternalPost::TYPE_LIKE, $extUrl, self::parseAuthor($entry));
       }
     }
-
+    
     throw new \Exception("No related post found on the URL.");
   }
 

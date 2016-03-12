@@ -56,7 +56,7 @@ class WebmentionPlugin implements Plugin {
             $post->set('html', '<span class="glyphicon glyphicon-retweet"></span> '.$annotation['author'].' reposted this.');
             break;
           case ExternalPost::TYPE_REPLY:
-            $post->set('html', '<span class="glyphicon glyphicon-comment"></span> '.$annotation['author'].' wrote a reply to this.');
+            $post->set('html', '<span class="glyphicon glyphicon-comment"></span> '.$annotation['author'].' wrote <a href="'.$crossPost['canonical_url'].'">a reply</a> to this.');
             break;
         }
       }
