@@ -112,11 +112,20 @@ class Controller implements ControllerProviderInterface {
 		));
 	}
 
-	public function renderFilteredViewPosts($filteredView) {
+	private function getViewHandler($filteredView) {
 		foreach ($this->views as $v) {
 			if ($v->getURLPath()==$filteredView) $viewHandler = $v;
 		}
 		if (!isset($viewHandler)) throw new NotFoundHttpException('/'.$filteredView);
+		return $viewHandler;
+	}
+
+	public function getFilteredViewPosts($filteredView) {
+		return $this->getViewHandler($filteredView)->getPostPage($this->client);
+	}
+
+	public function renderFilteredViewPosts($filteredView) {
+		$viewHandler = $this->getViewHandler($filteredView);
 		$processor = new PostProcessor($this->config['plugins']);
 		$page = $viewHandler->getPostPage($this->client);
 		foreach ($page as $post) $processor->add($post);
@@ -188,10 +197,10 @@ class Controller implements ControllerProviderInterface {
 		return $this->generateResponse('tagged.twig.html', $processor->renderForTemplate(View::STREAM), array('tag' => $tag));
 	}
 
-	public function renderRSS(array $posts) {
+	public function renderRSS($posts, $viewType = View::STREAM) {
 		$processor = new PostProcessor($this->config['plugins']);
 		foreach ($posts as $post) $processor->add($post);
-		return new Response($this->generateResponse('rss.twig.xml', $processor->renderForTemplate(View::STREAM)),
+		return new Response($this->generateResponse('rss.twig.xml', $processor->renderForTemplate($viewType)),
 			200, array('Content-Type' => 'application/rss+xml'));
 	}
 
@@ -296,9 +305,10 @@ class Controller implements ControllerProviderInterface {
 			return $controller->renderRecentPostsRSS();
 		});
 
-		$controllers->get('/tagged/{tag}/rss', function($tag) use ($controller) {
+		$controllers->get('/tagged/{tag}/rss', function($tag, Request $r) use ($controller) {
 			// Render the RSS feed for a specific hashtag
-			return $controller->renderRSS($this->client->retrievePostsWithHashtag($tag));
+			return $controller->renderRSS($this->client->retrievePostsWithHashtag($tag),
+				($r->query->has('fulltext') ? View::PERMALINK : View::STREAM));
 		});
 
 		$controllers->get('/post/{postId}', function($postId) use ($controller) {
@@ -344,6 +354,12 @@ class Controller implements ControllerProviderInterface {
 		$controllers->get('/{filteredView}', function($filteredView) use ($controller) {
 			// Return a filtered view of posts
 			return $controller->renderFilteredViewPosts($filteredView);
+		});
+
+		$controllers->get('/{filteredView}/rss', function($filteredView, Request $r) use ($controller) {
+			// Render the RSS feed for a filtered view of posts
+			return $controller->renderRSS($this->getFilteredViewPosts($filteredView),
+				($r->query->has('fulltext') ? View::PERMALINK : View::STREAM));
 		});
 
 		return $controllers;
