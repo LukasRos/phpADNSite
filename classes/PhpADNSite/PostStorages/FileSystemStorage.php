@@ -28,7 +28,7 @@ use PhpADNSite\Core\PostStorage;
 class FileSystemStorage implements PostStorage {
 
   private $datePath = 'Y/m';
-  private $basePath;
+  private $basePath;  
 
   public function __construct() {
     $this->basePath = realpath(__DIR__.'/../../../posts');
@@ -47,6 +47,11 @@ class FileSystemStorage implements PostStorage {
     $indexFilename = $this->basePath.DIRECTORY_SEPARATOR.$username.
       DIRECTORY_SEPARATOR.'index.json';
     file_put_contents($indexFilename, json_encode($index, JSON_PRETTY_PRINT));
+  }
+
+  private function loadPost($username, $dateFormatted, $id) {
+    return json_decode(file_get_contents($this->basePath.DIRECTORY_SEPARATOR.$username
+        .DIRECTORY_SEPARATOR.$dateFormatted.DIRECTORY_SEPARATOR.$id.'.json'), true);
   }
 
   public function storeOrUpdatePosts(array $posts) {
@@ -154,8 +159,7 @@ class FileSystemStorage implements PostStorage {
     rsort($allPostsForDate);
     $posts = array();
     foreach ($allPostsForDate as $id)
-      $posts[] = json_decode(file_get_contents($this->basePath.DIRECTORY_SEPARATOR.$username
-        .DIRECTORY_SEPARATOR.$dateFormatted.DIRECTORY_SEPARATOR.$id.'.json'), true);
+      $posts[] = $this->loadPost($username, $dateFormatted, $id);
     return $posts;
   }
 
@@ -183,8 +187,7 @@ class FileSystemStorage implements PostStorage {
 
   public function getPostThread($username, $postId) {
     $dateFormatted = $this->getPostDateFormattedByID($this->getIndex($username), $postId);
-    $post = json_decode(file_get_contents($this->basePath.DIRECTORY_SEPARATOR.$username
-      .DIRECTORY_SEPARATOR.$dateFormatted.DIRECTORY_SEPARATOR.$postId.'.json'), true);
+    $post = $this->loadPost($username, $dateFormatted, $postId);
     $post['user'] = $this->getUser($username);;
     return array(
       'meta' => array('more' => false),
@@ -220,6 +223,29 @@ class FileSystemStorage implements PostStorage {
       'meta' => array('more' => (count($output) > count($postsSliced))),
       'data' => $postsSliced
     );
+  }
+
+  public function getPostsWithHashtag($username, $tag) {
+    $user = $this->getUser($username);
+    $index = $this->getIndex($username);
+
+    $htListFilename = $this->basePath.DIRECTORY_SEPARATOR.$username.
+      DIRECTORY_SEPARATOR.'hashtags.json';
+
+    $hashtagPosts = file_exists($htListFilename)
+      ? json_decode(file_get_contents($htListFilename), true)
+      : array();
+
+    $posts = array();
+    if (isset($hashtagPosts[$tag])) {
+      foreach ($hashtagPosts[$tag] as $id) {
+        $dateFormatted = $this->getPostDateFormattedByID($index, $id);
+        if (!isset($dateFormatted)) continue;
+        $posts[] = array_merge($this->loadPost($username, $dateFormatted, $id), array('user' => $user));
+      }
+    }
+  
+    return array('data' => $posts);
   }
 
   public function configure($configuration) {

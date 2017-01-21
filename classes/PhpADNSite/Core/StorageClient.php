@@ -66,7 +66,7 @@ class StorageClient implements APIClient {
 	}
 
 	public function retrievePostsWithHashtag($tag) {
-		throw new \Exception("retrievePostsWithHashtag not yet implemented!");
+    return new PostPage($this->storage->getPostsWithHashtag($this->username, $tag));
 	}
 
 	public function retrievePostsOlderThan($id, $count = 20) {

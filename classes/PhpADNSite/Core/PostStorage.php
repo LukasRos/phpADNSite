@@ -49,6 +49,13 @@ interface PostStorage {
 	 */
 	 public function getPosts($username, $count, $maxId = null, $minId = null);
 
+	 /**
+	  * Get a list of posts that have a specific hashtag.
+	  * @param $username App.net username
+	  * @param $hashtag The tag to look up
+	  */
+	 public function getPostsWithHashtag($username, $tag);
+
 	/**
 	 * Apply configuration to the storage. This method is only called when
 	 * the "storage_config" key is specified in the configuration for the
