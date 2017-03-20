@@ -1,5 +1,9 @@
 # phpADNSite
 
+## Important Notice
+
+**app.net has shut down operation and this software no longer works in live mode. However it can be used to serve a previously created archive of app.net posts. The documentation will be updated to reflect this.**
+
 ## What is this?
 phpADNSite is a tool that allows you to present your microblog posts and conversations happening on the social networking backbone app.net on your own domain in your own visual style. The idea for phpADNSite as part of the app.net ecosystem is partly inspired by Tumblr, which combines a unified stream and post interface - your existing app.net client - with a fully customizable blog layout - phpADNSite.
 
